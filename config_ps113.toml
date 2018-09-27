@@ -1,0 +1,30 @@
+# configuration file for trace_source
+# https://github.com/toml-lang/toml
+#
+
+output_dir = "output/ps113/" 
+plot_dir = "plots/ps113" 
+traj_dir = "trajectories/ps113/" 
+
+geonames = 'atlantic'
+
+[time]
+    begin = '2018-05-09_00' 
+    end = '2018-06-10_00' 
+    # time step for which trajectories are calculated
+    step = 3
+    # duration of each trajectory
+    tr_duration = -240
+
+[height]
+    top = 12000
+    plottop = 10250
+    # 'md' mixing depth, '2.0' in km without
+    reception = ['md', '1.0', '2.0', '5.0']
+
+[station]
+    name = 'Polarstern PS113'
+    short_name = 'ps113'
+    moving = true
+    trackfile = 'data/Track_113.dat'
+    altitude = 5

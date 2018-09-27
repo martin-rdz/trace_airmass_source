@@ -1,0 +1,37 @@
+
+[standard]
+    filename = 'data/geo_names.kml'
+[standard.geo_names]
+    0 = 'cont_europe'
+    1 = 'sahara'
+    2 = 'arabian_peninsula'
+    3 = 'far_east_deserts'
+    4 = 'persia'
+    5 = 'india'
+
+[atlantic]
+    filename = 'data/geo_names_atlantic.kml'
+[atlantic.geo_names]
+    0 = 'cont_europe'
+    1 = 'africa'
+    2 = 'arabian_peninsula'
+    3 = 'south_america'
+    4 = 'persia'
+    5 = 'north_america'
+    
+
+[fire]
+    filename = 'data/geo_names_fire.kml'
+[fire.geo_names]
+    0 = 'cont_europe'
+    1 = 'western_canada'
+    2 = 'eastern_canada'
+    3 = 'russian_far_east'
+
+[south]
+    filename = 'data/geo_names_south.kml'
+[south.geo_names]
+    0 = 'south_america'
+    1 = 'africa'
+    2 = 'australia'
+    3 = 'new_zealand'
