@@ -1,10 +1,8 @@
 #! /usr/bin/env python3
 # coding=utf-8
+""""""
 """
 Author: radenz@tropos.de
-
-
-
 
 """
 
@@ -20,8 +18,16 @@ import toml
 
 def nearest(point, array, delta):
     """
-    searches nearest point in given array and returns (i, value[i])
+    searches nearest point in given array and returns (i, array[i])
     taken from BA programm an improved with index calculation
+
+    Args:
+        point (float): point to search for
+        array (np.array): array to search in
+        delta: step size in array
+
+    Returns: 
+        ``(i, array[i])``
     """
     # i = bisect.bisect_left(array, point)
     i = int((point - array[0]) / delta)
@@ -35,38 +41,48 @@ def nearest(point, array, delta):
 
 class land_sfc():
     """
+    load the data from the geotiff ``data/resampledLCType.tif``
+    and concatenate to the simplified scheme
+    
+    ===============   =========================
+    MODIS Category     simplified
+    ===============   =========================
+    0                  0 water
+    1,2,3,4,5,6        1 forrest
+    7,8,9              2 savanna, shrubland
+    10, 11, 12, 14     3 grass, cropland
+    13                 4 urban
+    15                 5 snow
+    16                 6 barren
+    ===============   =========================
 
     """
     def __init__(self):
-        """
-        load the data from the geotiff and concatenate to the simplified scheme
-
-        """
         filename =  os.path.dirname(os.path.abspath(__file__)) +\
                     '/../data/resampledLCType.tif'
 
-        with rasterio.drivers():
-            with rasterio.open(filename, 'r') as src:
-                meta = src.meta
-                width = meta['width']
-                height = meta['height']
-                count = meta['count']
-                dtype = meta['dtype']
-                self.shape = src.shape
-                self.transform = src.transform
+        #with rasterio.divers():
+        with rasterio.open(filename, 'r') as src:
+            meta = src.meta
+            width = meta['width']
+            height = meta['height']
+            count = meta['count']
+            dtype = meta['dtype']
+            self.shape = src.shape
+            self.transform = src.transform
 
-                T0 = src.affine
-                p1 = Proj(src.crs)
-                print('T0 aka affine transformation ', T0)
-                print('src.crs', src.crs)
-                print('p1', p1)
+            T0 = src.affine
+            p1 = Proj(src.crs)
+            print('T0 aka affine transformation ', T0)
+            print('src.crs', src.crs)
+            print('p1', p1)
 
-                # allocate memory for image
-                im = np.empty([height, width], dtype)
+            # allocate memory for image
+            im = np.empty([height, width], dtype)
 
-                # read image into memory
-                print(meta)
-                im[:, :] = src.read(1)
+            # read image into memory
+            print(meta)
+            im[:, :] = src.read(1)
 
 
         T1 = T0 * Affine.translation(0.5, 0.5)
@@ -123,11 +139,15 @@ class land_sfc():
 
     def get_land_sfc(self, lat, lon):
         """
-        get the land use pixel for a given lat and lon (both might be arrays or floats)
-
+        get the land use pixel for a given coordinate
         interpolation to the nearest pixel is done
 
-        :return: array or int with the land use category
+        Args:
+            lat (float, array): latitude
+            lon (float, array): longitude
+
+        Returns:
+            array or int with the land use category
         """
 
         if isinstance(lat, float):
@@ -152,11 +172,15 @@ class land_sfc():
 
         return land_sfc_category
 
+
     def get_land_sfc_shape(self, shp):
         """
         get the land use inside a given shape
 
         :param shp: shapely Multipolygon
+
+        .. deprecated:: 0.1
+            use the ensemble trajectories instead
         """
 
         import rasterio.features
@@ -165,8 +189,6 @@ class land_sfc():
             shp,
             out_shape=self.shape,
             transform=self.transform)
-
-        #print(np.sum(mask), mask)
 
         masked_land_sfc = np.ma.MaskedArray(self.land_sfc,
                                             mask=np.logical_not(mask),
@@ -178,12 +200,12 @@ class land_sfc():
 
 class named_geography():
     """
-    load the data from the kml file specified in the config
+    handle a single trajectory
+    
+    Args:
+        selected_type (str): name in the ``geonames_config.toml``
     """
     def __init__(self, selected_type):
-        """
-
-        """
         config_file = 'geonames_config.toml'
         with open(config_file) as config_file:
             self.config = toml.loads(config_file.read())
@@ -205,8 +227,8 @@ class named_geography():
             polygons[p.name] = p.geometry
 
         self.polygons = polygons
-        self.geo_names = {0: 'cont_europe', 1: 'sahara', 2: 'arabian_peninsula',
-                          3: 'far_east_deserts', 4: 'persia', 5: 'india'}
+        # self.geo_names = {0: 'cont_europe', 1: 'sahara', 2: 'arabian_peninsula',
+        #                   3: 'far_east_deserts', 4: 'persia', 5: 'india'}
         self.geo_names = {int(k): v for k, v in self.config[selected_type]['geo_names'].items()}
         assert set(polygons.keys()) == set(self.geo_names.values()), \
             ('not all keys in polygon are matched', polygons.keys(), self.geo_names.values())
@@ -216,10 +238,17 @@ class named_geography():
 
     def get_geo_names(self, lat, lon):
         """
-        get the names defined in the shapefile for a given lat and lon (both might be arrays or floats)
+        get the names defined in the shapefile for a given coordinate
 
-        :return: array or int with the land use category
+
+        Args:
+            lat (float, array): latitude
+            lon (float, array): longitude
+
+        Returns:
+            array or int with the geoname category
         """
+
         if isinstance(lat, float):
             lat = [lat]
             lon = [lon]

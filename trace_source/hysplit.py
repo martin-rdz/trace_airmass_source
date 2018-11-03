@@ -1,12 +1,11 @@
 #! /usr/bin/env python3
 # coding=utf-8
+""""""
 """
 Author: radenz@tropos.de
 
 TODO
 ----
-
-
 
 """ 
 
@@ -27,8 +26,13 @@ def plot_trajectories_ens(traj, savepath, ls=None):
     """
     plot multiple trajectories into one scene
 
-    :param traj: trajectory instances
-    :return:
+    Args:
+        traj (:class:`.trajectory`): trajectory to plot instance to plot
+        savepath (str): path to save
+        ls (:class:`trace_source.land_sfc.land_sfc`, optional): pre loaded land surface information
+
+    Returns:
+        None
     """
 
     import matplotlib
@@ -147,17 +151,28 @@ def plot_trajectories_ens(traj, savepath, ls=None):
 
 def save_item(dataset, item_data):
     """
-    * var_name (Z)
-    * dimension ( ('time', 'height') )
-    * arr (self.corr_refl_reg[:].filled())
-    * long_name ("Reflectivity factor")
-    * optional
-    * comment ("Wind profiler reflectivity factor corrected by cloud radar (only Bragg contribution)")
-    * units ("dBz")
-    * missing_value (-200.)
-    * plot_range ((-50., 20.))
-    * plot_scale ("linear")
-    * vartype of the variable
+    Save an item to the dataset with the data given as a dict
+
+    Args:
+        dataset (:obj:netCDF4.Dataset): netcdf4 Dataset to add
+        item_data (dict): with the data to add, for example:
+
+    ==================  ===============================================================
+     Key                 Example                            
+    ==================  ===============================================================
+     ``var_name``        Z                                  
+     ``dimension``       ('time', 'height')                 
+     ``arr``             self.corr_refl_reg[:].filled()     
+     ``long_name``       "Reflectivity factor"              
+     **optional**                                             
+     ``comment``         "Wind profiler reflectivity factor corrected by cloud radar"
+     ``units``           "dBz"                              
+     ``missing_value``   -200.                              
+     ``plot_range``      [-50., 20.]                        
+     ``plot_scale``      "linear"                           
+     ``vartype``         np.float32                         
+    ==================  ===============================================================
+ 
     """
 
     if 'vartype' in item_data.keys():
@@ -186,14 +201,15 @@ def save_item(dataset, item_data):
 
 class assemble_time_height():
     """
-    class for assembling a time height period
-    put multiple hysplit trajectories and the statistics together in a netcdf file
+    assemble a time height period by putting multiple hysplit trajectories togehter,
+    calculate the statistics and save to a netcdf file
+    
+    Args:
+
+        config_file (str, optional): path to the config file 
+
     """
     def __init__(self, config_file='../config.toml'):
-        """
-        :param config_file toml-file with the configuration
-        """
-
         with open(config_file) as config_file:
             self.config = toml.loads(config_file.read())
 
@@ -201,7 +217,7 @@ class assemble_time_height():
                                                                      '%Y-%m-%d_%H')
         self.config['time']['end_dt'] = datetime.datetime.strptime(self.config['time']['end'],
                                                                    '%Y-%m-%d_%H')
-        print(self.config)
+        print('config', self.config)
         self.dt_list = trace_source.time_list(self.config['time']['begin_dt'],
                                               self.config['time']['end_dt'],
                                               self.config['time']['step'])
@@ -209,12 +225,14 @@ class assemble_time_height():
         self.height_list = list(range(500, self.config['height']['top']+1, 500))
 
 
-
     def assemble(self, dt_range=None):
         """
-        assemble the time range given in the config file
-
-        all the statistics within a trajectory.statistics instance are collected in a dict
+        assemble the statistics for a range of trajectories and
+        save the statistics to dicts
+        
+        Args:
+            dt_range (list(datetime), optional): timerange for that the statistics is assembled,
+                default taken from config 
 
         """
         if dt_range is not None:
@@ -223,8 +241,6 @@ class assemble_time_height():
                                                   self.config['time']['step'])
 
         # only for the testcase
-        traj_dir = '../prior_examples/test_trajectories/'
-        traj_dir = '../prior_examples/trajectories_ens/'
         traj_dir = self.config['traj_dir']
         files = os.listdir(traj_dir)
         # filter only for the trajectory files with tdump extension
@@ -313,7 +329,8 @@ class assemble_time_height():
 
     def dump2netcdf(self):
         """
-        dump the assembled data to a netcdf file
+        dump the assembled data to a netcdf file repeatatly call :meth:`save_item`
+        configuration (directories, names, etc) is given by the config file
         """
 
         timestamps = np.array([(dt - datetime.datetime(1970,1,1)).total_seconds() for dt in self.dt_list])
@@ -420,14 +437,18 @@ class assemble_time_height():
         #                     'plot_scale': "logarithmic"})
 
 
+        with open('output_meta.toml') as output_meta:
+            meta_info = toml.loads(output_meta.read())
+
         dataset.description = "trace_source trajectory"
         dataset.location = self.config['station']['name']
         if "moving" in self.config['station'].keys() and self.config['station']['moving'] == True:
             dataset.coordinates = "Moving Platform!"
         else:
             dataset.coordinates = (self.config['station']['lat'], self.config['station']['lon'])
-        dataset.institution = "TROPOS"
-        dataset.contact = "radenz@tropos.de"
+        dataset.institution = meta_info["institution"]
+        dataset.authors = meta_info["authors"]
+        dataset.contact = meta_info["contact"]
         dataset.creation_time = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
         dataset.day = self.dt_list[0].day
         dataset.month = self.dt_list[0].month
@@ -438,7 +459,10 @@ class assemble_time_height():
 
 class trajectory():
     """
-    operate on a single hysplit trajectory
+    handle a single trajectory
+    
+    Args:
+        config (dict): content of the config file
     """
 
     def __init__(self, config):
@@ -450,7 +474,13 @@ class trajectory():
         
         
     def load_file(self, filename, silent=False):
-        """load a trajectory given by the filename"""
+        """load a trajectory from the .tdump file
+
+        Args:
+            filename (str): path and name of the file
+            silent (bool, optional): verbose output or not
+        
+        """
         print('filename', filename) if not silent else None
 
         #parameters_key = ["PRESSURE", "AIR_TEMP", "RAINFALL", "RELHUMID", "TERR_MSL"]
@@ -521,7 +551,14 @@ class trajectory():
 
 
     def load_dict(self, d):
-        """load the trajectory form a given dictionary"""
+        """load the trajectory without the original data
+        
+        .. note::
+            only the first member of a ensemble is saved
+
+        Args:
+            d (dict)
+        """
 
         self.info = d['info']
         self.data = {1: d['data']}
@@ -531,10 +568,17 @@ class trajectory():
         """
         load the trajectory at a given datetime and height from the provided netcdf file
 
-        :param ncf: netcdf file instance
-        :param dt: datetime object
-        :param height: height
-        :returns: dict with data
+        Args:
+            ncf (:obj:netCDF4.Dataset): netcdf4 Dataset to add
+            dt: datetime of trajectory to load
+            height: height of trajectory to load
+
+        Returns:
+            dict with data
+
+            Keys: ``time``, ``age``, ``latitude``, ``longitude``, ``height``
+
+            Optional ``pressure``, ``air_tem``, ``rainfall``, ``relhumid``, ``terr_msl``
         """
 
         d = {}
@@ -561,10 +605,13 @@ class trajectory():
 
 
     def add_land_sfc(self, ls=None, silent=False):
-        """
-        land use pixel directly along the trajectory
+        """ add the land surface information to a single trajectory
+            
+        Args:
+            ls (:class:`trace_source.land_sfc.land_sfc`, optional): pre loaded land surface information
+                (separate loading consumes lot of time)
+            silent (bool, optional): verbose output or not
 
-        :param ls: is used to pass the trace_source.land_sfc.land_sfc() (separate loading consumes lot of time)
         """
 
         if ls is None:
@@ -594,11 +641,13 @@ class trajectory():
 
 
     def add_ensemble_land_sfc(self, ls=None):
-        """
-        add the land use from a ensemble trajectory
+        """ add the land surface information to an ensemble trajectory
+            
+        Args:
+            ls (:class:`trace_source.land_sfc.land_sfc`, optional): pre loaded land surface information
+                (separate loading consumes lot of time)
+            silent (bool, optional): verbose output or not
 
-        :param ls: is used to pass the trace_source.land_sfc.land_sfc() (separate loading consumes lot of time)
-        :return:
         """
 
         if ls is None:
@@ -630,10 +679,13 @@ class trajectory():
 
     def add_ensemble_geo_names(self, ng=None):
         """
-        add the geographical names from a ensemble trajectory
+        add the geographical names to a ensemble trajectory
+            
+        Args:
+            ng (:class:`trace_source.land_sfc.named_geography`, optional): pre loaded named geography information
+                (separate loading consumes lot of time)
+            silent (bool, optional): verbose output or not
 
-        :param ls: is used to pass the trace_source.land_sfc.land_sfc() (separate loading consumes lot of time)
-        :return:
         """
 
         if ng is None:
@@ -667,14 +719,27 @@ class trajectory():
         """
         land use inside an area around the trajectory
 
-        add the shape to self.shapes['shp_below{:.1f}km']
-        and the statistics to self.stat_ls['occ_shp_below{:.1f}km']
+
+
+        add the shape to ``self.shapes['shp_below{:.1f}km']``
+
+        and the statistics to ``self.stat_ls['occ_shp_below{:.1f}km']``
 
         sizes of circle (in 24h steps):
-        [ 0.05      ,  0.15      ,  0.4       ,  0.77666667,  1.25666667,
-        1.81666667,  2.43333333,  3.08333333,  3.74333333,  4.39      ,  5.        ]
 
-        :param maxheight: maximum height in meters or md for MIXDEPTH
+        .. code-block:: python
+
+           [ 0.05      ,  0.15      ,  0.4       ,  0.77666667,  1.25666667,
+            1.81666667,  2.43333333,  3.08333333,  3.74333333,  4.39      ,  5.]
+
+        Args:
+            maxheight: maximum height in meters or md for MIXDEPTH
+            ls (:class:`trace_source.land_sfc.land_sfc`, optional): pre loaded land surface information
+                (separate loading consumes lot of time)
+            silent (bool, optional): verbose output or not
+
+        .. deprecated:: 0.1
+            use the ensemble trajectories instead
         """
 
         import shapely.geometry as sgeom
@@ -737,18 +802,13 @@ class trajectory():
         
     def evaluate(self, silent=False):
         """
-        evaluate a single trajectory, ie assemble the statistics for single trajectory
+        adds some general statistic to a single trajectory
 
-        for example
-        * Tmin_whole
-        * Precip_whole
-        * RHmax_whole
-        * Tmin_24h
-        * Precip_24h
-        * RHmax24h
-        * min_height_ag
-        * traj_distance_total
-        * mean_bearing_from_endpoint
+        Keys: ``Tmin_whole``, ``Precip_whole``, ``RHmax_whole``, ``Tmin_24h``, ``Precip_24h``,
+        ``RHmax24h``, ``min_height_ag``, ``traj_distance_total``, ``mean_bearing_from_endpoint``
+
+        Args:
+            silent (bool, optional): verbose output or not
 
         """
 

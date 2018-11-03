@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 # coding=utf-8
+""""""
 """
 Author: radenz@tropos.de
 
@@ -14,7 +15,16 @@ import trace_source.simulations
 
 
 def time_list(begin, end, delta):
-    """generate a time list from begin to <= end with delta"""
+    """generate a time list from begin to <= end with delta
+
+    Args:
+        begin (datetime): start time
+        end (datetime): end time (included)
+
+    Returns:
+        list: List of generated datetime objects
+
+    """
     time_list = []
     elem = begin
     while elem <= end:

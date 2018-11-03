@@ -18,7 +18,7 @@ RUN apt-get update && add-apt-repository ppa:ubuntugis/ppa && apt-get update && 
   libatlas-base-dev gfortran \
   libjpeg8-dev libfreetype6-dev libpng12-dev \
   binutils libproj-dev libgdal-dev gdal-bin python3-numpy python3-mysqldb \
-  python3-scipy
+  python3-scipy python3-sphinx
 
 # libzmq3-dev sqlite3 libsqlite3-dev pandoc libcurl4-openssl-dev nodejs \
 
@@ -38,7 +38,7 @@ RUN pip3 install cython
 RUN pip3 install ipython[notebook]
 RUN pip3 install numpy
 RUN pip3 install scipy
-RUN pip3 install matplotlib
+RUN pip3 install matplotlib==2.0.2
 RUN pip3 install shapely
 RUN pip3 install pyshp
 RUN pip3 install six
@@ -48,8 +48,12 @@ RUN pip3 install toml
 RUN pip3 install netcdf4
 RUN pip3 install pyproj
 #RUN pip3 install Mysqldb
-RUN pip3 install rasterio
+RUN pip3 install rasterio==0.36.0
 RUN pip3 install cartopy
+RUN pip3 install --upgrade Sphinx
+RUN pip3 install sphinx_rtd_theme
+RUN pip3 install recommonmark
+#RUN pip3 install m2r
 
 
 #RUN rm -f /etc/service/sshd/down

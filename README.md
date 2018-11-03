@@ -1,19 +1,24 @@
 
-# trace: trajectory analysis tool
+## trace: trajectory analysis tool
 
-Ensemble backward trajectories are combined with a land cover classification for a temporally and vertically resolved airmass source attribution. At first, a 27-member ensemble of 10-day backward trajectories is calculated using HYSPLIT (Stein et al., 2015). Meteorological input data for HYSPLIT are taken from the GDAS1 dataset (https://www.ready.noaa.gov/gdas1.php) provided by the Air Resources Laboratory (ARL) of the U.S. National Weather Service’s National Centers for Environmental Prediction (NCEP). Each ensemble is generated using a small spatial offset in the trajectory endpoint. Whenever a trajectory is below the mixing depth provided in the GDAS1 data (“reception height”), the land cover is categorized using custom defined polygons according to land mass boundaries or a simplified version (number of categories reduced to 7) of the MODIS land cover classification (Friedl et al., 2002, Broxton et al., 2014). Hence, an airparcel is assumed to be influenced by the land surface if the trajectory is below the mixing depth. The residence time for each category is then the total time an airparcel fulfilled this criterion by land cover category. This calculation is repeated in steps of 3h in time and 500m in height to provide a continuous estimate on the airmass source and as a first hint on potential aerosol load.
+Ensemble backward trajectories are combined with a land cover classification for a temporally and vertically resolved airmass source attribution. At first, a 27-member ensemble of 10-day backward trajectories is calculated using HYSPLIT (Stein et al., 2015). Meteorological input data for HYSPLIT are taken from the GDAS1 dataset (<https://www.ready.noaa.gov/gdas1.php>) provided by the Air Resources Laboratory (ARL) of the U.S. National Weather Service’s National Centers for Environmental Prediction (NCEP). Each ensemble is generated using a small spatial offset in the trajectory endpoint. Whenever a trajectory is below the mixing depth provided in the GDAS1 data (“reception height”), the land cover is categorized using custom defined polygons according to land mass boundaries or a simplified version (number of categories reduced to 7) of the MODIS land cover classification (Friedl et al., 2002, Broxton et al., 2014). Hence, an airparcel is assumed to be influenced by the land surface if the trajectory is below the mixing depth. The residence time for each category is then the total time an airparcel fulfilled this criterion by land cover category. This calculation is repeated in steps of 3h in time and 500m in height to provide a continuous estimate on the airmass source and as a first hint on potential aerosol load.
 From the results a time-height plot of airmass source can be generated for a certain location, which is comparable to active remote sensing time-height plots.
 
+Comprehensive documentation is available at [trace-doc](https://martin-rdz.github.io/trace-doc/)
 
 ### Examples
+![](examples/20180324_12_03000_trajectories_map.png)
 ![](examples/20180324_limassol_multi-geonames-abs-region-ens-belowmd.png)
-![](examples/20180324_limassol_multi-land-use-abs-occ-ens-belowmd.png)
+![](examples/20180324_limassol_multi-land-use-abs-occ-ens-belowmd.png) 
 
 
-### Setup & Usage
+### Setup
+trace is written in python3 and requires an extensive of additional packages. There are two options to acquire these packages.
 
-trace is written in python3 and requires an extensive set of libraries. See (requirements.txt) for a full list.
+#### local python installataion
+Install all the packages listed in [requirements.txt](requirements.txt)
 
+#### docker container
 Deployment may be simplified using a docker image which includes all the dependencies.
 A Dockerfile is included in this repository.
 
@@ -21,8 +26,13 @@ A Dockerfile is included in this repository.
     docker build -t trace_env .
     # run an interactive bash on this image
     docker run -v `pwd`:/trace -it trace_env /bin/bash
+    # or to build the documentation as well
+    docker run -v `pwd`/..:/trace -it trace_env /bin/bash
+
+Please put your credentials in the `output_meta.toml` file.
     
-    
+
+### Usage
 Running trace consists of several steps, that are automated in the `autorun.sh` script.
 
 Generating the a list of trajectories that are required, i.e. an input file for HYSPLIT:
@@ -47,13 +57,14 @@ Afterwards the files with the raw trajectires can be compressed to day-wise zip 
 
 
 ### HYSPLIT input data
-
-Hysplit ensemble backward trajectories are required. In the default setup 10 days with a temporal resolution of 1h. Such an trajectory is calculated every 3h in steps of 500m. Conveniently the input trajectories are placed in the `trajectories` directory.
+HYSPLIT ensemble backward trajectories are required. Please note that HYSPLIT itself is not provided within this package (The binary to run is `hyts_ens` with the respective `CONTROL` file).
+In the default setup 10 days with a temporal resolution of 1h. Such an trajectory is calculated every 3h in steps of 500m. Conveniently the input trajectories are placed in the `trajectories` directory.
 
 The filename of each trajectory should be
     hysplit_trajectory-[YYYYMMDD-HH]-[lat]-[lon]-[height]-[length].tdump
 
 SETUP.CFG
+
     &SETUP
     KMSL=0,
     tm_rain=1,
@@ -68,6 +79,7 @@ SETUP.CFG
     /
 
 TRAJ.CFG
+
     &SETUP
     tratio = 0.75,
     delt = 0.0,
@@ -116,19 +128,19 @@ The second one - `geonames_config.toml` - is used to wire togehter the named geo
 
 
 ### Used in
-- Haarig, M., Ansmann, A., Gasteiger, J., Kandler, K., Althausen, D., Baars, H., Radenz, M., and Farrell, D. A.: Dry versus wet marine particle optical properties: RH dependence of depolarization ratio, backscatter, and extinction from multiwavelength lidar measurements during SALTRACE, Atmos. Chem. Phys., 17, 14199-14217, https://doi.org/10.5194/acp-17-14199-2017, 2017. 
+- Haarig, M., Ansmann, A., Gasteiger, J., Kandler, K., Althausen, D., Baars, H., Radenz, M., and Farrell, D. A.: Dry versus wet marine particle optical properties: RH dependence of depolarization ratio, backscatter, and extinction from multiwavelength lidar measurements during SALTRACE, Atmos. Chem. Phys., 17, 14199-14217, <https://doi.org/10.5194/acp-17-14199-2017>, 2017. 
 
 
 ### References
-- Stein, A.F., R.R. Draxler, G.D. Rolph, B.J. Stunder, M.D. Cohen, and F. Ngan: NOAA’s HYSPLIT Atmospheric Transport and Dispersion Modeling System. Bull. Amer. Meteor. Soc., 96, 2059–2077, https://doi.org/10.1175/BAMS-D-14-00110.1, 2015
-- Friedl, M. A., McIver, D. K., Hodges, J. C., Zhang, X. Y., Muchoney, D., Strahler, A. H., Woodcock, C.E., Gopal, S., Schneider, A., Cooper, A., Baccini, A., Gao, F., Schaaf, C.: Global land cover mapping from MODIS: algorithms and early results. Remote sensing of Environment, 83(1-2), 287-302, 2002
-- Broxton, P.D., Zeng, X., Sulla-Menashe, D., Troch, P.A.: A Global Land Cover Climatology Using MODIS Data. J. Appl. Meteor. Climatol., 53, 1593-1605. doi: http://dx.doi.org/10.1175/JAMC-D-13-0270.1, 2014
+- Stein, A.F., R.R. Draxler, G.D. Rolph, B.J. Stunder, M.D. Cohen, and F. Ngan: NOAA’s HYSPLIT Atmospheric Transport and Dispersion Modeling System. Bull. Amer. Meteor. Soc., 96, 2059–2077, <https://doi.org/10.1175/BAMS-D-14-00110.1>, 2015
+- Friedl, M. A., McIver, D. K., Hodges, J. C., Zhang, X. Y., Muchoney, D., Strahler, A. H., Woodcock, C.E., Gopal, S., Schneider, A., Cooper, A., Baccini, A., Gao, F., Schaaf, C.: Global land cover mapping from MODIS: algorithms and early results. Remote Sens. Environ., 83(1-2), 287-302, <https://doi.org/10.1016/S0034-4257(02)00078-0>, 2002
+- Broxton, P.D., Zeng, X., Sulla-Menashe, D., Troch, P.A.: A Global Land Cover Climatology Using MODIS Data. J. Appl. Meteor. Climatol., 53, 1593-1605. <http://dx.doi.org/10.1175/JAMC-D-13-0270.1>, 2014
 
 
 ### License
 Copyright 2018, Martin Radenz
 [MIT License](http://www.opensource.org/licenses/mit-license.php)
 
-
+<!--
 https://landcover.usgs.gov/global_climatology.php 
-http://journals.ametsoc.org/doi/abs/10.1175/JAMC-D-13-0270.1
+http://journals.ametsoc.org/doi/abs/10.1175/JAMC-D-13-0270.1-->
