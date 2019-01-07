@@ -129,6 +129,7 @@ The second one - `geonames_config.toml` - is used to wire togehter the named geo
 
 ### Used in
 - Haarig, M., Ansmann, A., Gasteiger, J., Kandler, K., Althausen, D., Baars, H., Radenz, M., and Farrell, D. A.: Dry versus wet marine particle optical properties: RH dependence of depolarization ratio, backscatter, and extinction from multiwavelength lidar measurements during SALTRACE, Atmos. Chem. Phys., 17, 14199-14217, <https://doi.org/10.5194/acp-17-14199-2017>, 2017. 
+- Foth, A., Kanitz, T., Engelmann, R., Baars, H., Radenz, M., Seifert, P., Barja, B., Kalesse, H., and Ansmann, A.: Vertical aerosol distribution in the Southern hemispheric Midlatitudes as observed with lidar at Punta Arenas, Chile (53.2° S and 70.9° W) during ALPACA, Atmos. Chem. Phys. Discuss., <https://doi.org/10.5194/acp-2018-1124>, in review, 2018. 
 
 
 ### References

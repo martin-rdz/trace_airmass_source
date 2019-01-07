@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../')
 import trace_source
 
 
-def plot_trajectories_ens(traj, savepath, ls=None):
+def plot_trajectories_ens(traj, savepath, ls=None, config=None):
     """
     plot multiple trajectories into one scene
 
@@ -30,6 +30,7 @@ def plot_trajectories_ens(traj, savepath, ls=None):
         traj (:class:`.trajectory`): trajectory to plot instance to plot
         savepath (str): path to save
         ls (:class:`trace_source.land_sfc.land_sfc`, optional): pre loaded land surface information
+        config (dict, optional): the toml derived config dict
 
     Returns:
         None
@@ -54,10 +55,14 @@ def plot_trajectories_ens(traj, savepath, ls=None):
     ###
 
     fig = plt.figure(figsize=(8, 10))
-    #ax = plt.axes(projection=ccrs.Miller(central_longitude=-170.))
-    ax = plt.axes(projection=ccrs.Miller())
-    # Projection for the north pole
-    # ax = plt.axes(projection=ccrs.NorthPolarStereo())
+    if config is not None and "centerlon" in config['plotmap']:
+        ax = plt.axes(projection=ccrs.Miller(central_longitude=config['plotmap']['centerlon']))
+    else:
+        ax = plt.axes(projection=ccrs.Miller(central_longitude=-170.))
+        ax = plt.axes(projection=ccrs.Miller())
+        # Projection for the north pole
+        # ax = plt.axes(projection=ccrs.NorthPolarStereo())
+        raise ValueError('provide plotmap.centerlon in the config file')
 
     ####
     # make a color map of fixed colors
@@ -79,11 +84,16 @@ def plot_trajectories_ens(traj, savepath, ls=None):
                 transform=ccrs.Geodetic())
 
     ax.gridlines(linestyle=':')
-    # bounds for the north pole
-    #ax.set_extent([-180, 180, 50, 90], crs=ccrs.PlateCarree())
-    # bounds for punta arenas
-    #ax.set_extent([-180, 180, -90, 10], crs=ccrs.PlateCarree())
-    ax.set_extent([-180, 80, -70, 75], crs=ccrs.PlateCarree())
+    if config is not None and "bounds" in config['plotmap']:
+        ax.set_extent(config['plotmap']['bounds'], crs=ccrs.PlateCarree())
+    else:
+        # bounds for punta arenas
+        ax.set_extent([-180, 180, -75, 0], crs=ccrs.PlateCarree())
+        # bounds for atlantic
+        #ax.set_extent([-180, 80, -70, 75], crs=ccrs.PlateCarree())
+        # bounds for the north pole
+        #ax.set_extent([-180, 180, 50, 90], crs=ccrs.PlateCarree())
+        raise ValueError('provide plotmap.bounds in the config file')
     ax.set_title('Trajectory {}UTC\n{} {} '.format(traj.info['date'].strftime('%Y-%m-%d %H'),
                                                    traj.info['lat'], traj.info['lon']),
                  fontweight='semibold', fontsize=13)
@@ -285,9 +295,20 @@ class assemble_time_height():
                 traj = trajectory(self.config)
                 traj.load_file(traj_dir+f[0], silent=True)
                 savepath = '{}/{}'.format(self.config['plot_dir'], dt.strftime('%Y%m%d'))
-                if f[1] == 3000.0 and dt.hour % 12 == 0:
-                #if f[1] <= 3000.0 and dt.hour % 6 == 0:
-                    plot_trajectories_ens(traj, savepath, ls=ls)
+
+
+                if "timeinterval" in self.config['plotmap']:
+                    timeinterval = self.config['plotmap']['timeinterval']
+                else:
+                    timeinterval = 12
+                if "heights" in self.config['plotmap']:
+                    heightlist = self.config['plotmap']['heights']
+                else:
+                    heightlist = [1500.0, 3000.0, 4500.0]
+                #if f[1] == 3000.0 and dt.hour % 12 == 0:
+                if f[1] in heightlist and dt.hour % timeinterval == 0:
+                    print("plotting ", f[1], dt.hour)
+                    plot_trajectories_ens(traj, savepath, ls=ls, config=self.config)
                 #continue
 
                 traj.evaluate(silent=True)

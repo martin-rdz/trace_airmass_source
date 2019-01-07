@@ -18,12 +18,13 @@ import toml
 #print(os.listdir('output/'))
 #print(os.listdir('output/barbados/'))
 
-def gen_file_list(start, end, station):
+def gen_file_list(start, end, path, station):
     l = []
     current = start
     while current <= end:
         #l.append('output/{}_{}_hysplit-output.nc'.format(current.strftime('%Y%m%d'), station))
-        l.append('output/{1}/{0}_{1}_hysplit-output.nc'.format(current.strftime('%Y%m%d'), station))
+        #l.append('output/{1}/{0}_{1}_hysplit-output.nc'.format(current.strftime('%Y%m%d'), station))
+        l.append(path + '/{0}_{1}_hysplit-output.nc'.format(current.strftime('%Y%m%d'), station))
         current = current + datetime.timedelta(days=1)
     return l
 
@@ -112,7 +113,7 @@ def plot_source_2d(f, parameter, dt_list, dsp, config, savepath):
     plt.tight_layout(rect=[0, 0.02, 1, 0.88])
     fig.subplots_adjust(wspace=0)
 
-    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_multi-land-use-{}-{}.png".format(station, dsp, parameter.replace('_', '-'))
+    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_multi-land-use-{}-{}.png".format(short_name, dsp, parameter.replace('_', '-'))
     fig.savefig(savename, dpi=400)
     plt.close()
 
@@ -202,7 +203,8 @@ def plot_geonames_2d(f, parameter, dt_list, dsp, config, savepath):
     #                 fontsize=12, fontweight='semibold')
 
     fig.legend(l, list(geo_names.values()),
-               bbox_to_anchor=(0.85, 0.952),
+               loc='upper left',
+               bbox_to_anchor=(0.01, 0.952),
                ncol=6, fontsize=12, framealpha=0.8)
     #fig.set_tight_layout({'rect': [0, 0, 1, 1], 'pad': 0.1, 'h_pad': 1.5})
     #plt.tight_layout(w_pad=0.0002)
@@ -211,7 +213,7 @@ def plot_geonames_2d(f, parameter, dt_list, dsp, config, savepath):
     plt.tight_layout(rect=[0, 0.02, 1, 0.90])
     fig.subplots_adjust(wspace=0)
 
-    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_multi-geonames-{}-{}.png".format(station, dsp, parameter.replace('_', '-'))
+    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_multi-geonames-{}-{}.png".format(short_name, dsp, parameter.replace('_', '-'))
     fig.savefig(savename, dpi=400)
     plt.close()
 
@@ -273,7 +275,7 @@ def plot_source_height_profile(f, parameter, dt, it, config, savepath):
                    direction='in')
 
     plt.tight_layout(rect=[0,0,0.92,1])
-    savename = savepath + "/" + dt.strftime("%Y%m%d_%H") + "_station_land_use_rel_{}.png".format(station, parameter)
+    savename = savepath + "/" + dt.strftime("%Y%m%d_%H") + "_station_land_use_rel_{}.png".format(short_name, parameter)
     fig.savefig(savename, dpi=250)
     plt.close()
 
@@ -339,7 +341,7 @@ def plot_filename(filename, config_file='config.toml'):
     cbar.ax.tick_params(axis='both', which='major', labelsize=14,
                         width=2, length=4)
 
-    savename = savepath + "/" + dt_list[0].strftime("%Y%m%d_%H%M") + "_{}_min_height.png".format(station)
+    savename = savepath + "/" + dt_list[0].strftime("%Y%m%d_%H%M") + "_{}_min_height.png".format(short_name)
     fig.savefig(savename, dpi=250)
     plt.close()
 
@@ -371,7 +373,7 @@ def plot_filename(filename, config_file='config.toml'):
     cbar.ax.tick_params(axis='both', which='major', labelsize=14,
                         width=2, length=4)
 
-    savename = savepath + "/" + dt_list[0].strftime("%Y%m%d_%H%M")+ "_{}_min_T_whole.png".format(station)
+    savename = savepath + "/" + dt_list[0].strftime("%Y%m%d_%H%M")+ "_{}_min_T_whole.png".format(short_name)
     fig.savefig(savename, dpi=250)
     plt.close()
 
@@ -404,7 +406,7 @@ def plot_filename(filename, config_file='config.toml'):
     cbar.ax.tick_params(axis='both', which='major', labelsize=14,
                         width=2, length=4)
 
-    savename = savepath + "/" + dt_list[0].strftime("%Y%m%d_%H%M") + "_{}_mint_T_24h.png".format(station)
+    savename = savepath + "/" + dt_list[0].strftime("%Y%m%d_%H%M") + "_{}_mint_T_24h.png".format(short_name)
     fig.savefig(savename, dpi=250)
     plt.close()
 
@@ -436,7 +438,7 @@ def plot_filename(filename, config_file='config.toml'):
     cbar.ax.tick_params(axis='both', which='major', labelsize=14,
                         width=2, length=4)
 
-    savename = savepath + "/" + dt_list[0].strftime("%Y%m%d_%H%M")+ "_{}_mean_bearing.png".format(station)
+    savename = savepath + "/" + dt_list[0].strftime("%Y%m%d_%H%M")+ "_{}_mean_bearing.png".format(short_name)
     fig.savefig(savename, dpi=250)
     plt.close()
 
@@ -468,7 +470,7 @@ def plot_filename(filename, config_file='config.toml'):
     cbar.ax.tick_params(axis='both', which='major', labelsize=14,
                         width=2, length=4)
 
-    savename = savepath + "/" + dt_list[0].strftime("%Y%m%d_%H%M") + "_{}_length_tot.png".format(station)
+    savename = savepath + "/" + dt_list[0].strftime("%Y%m%d_%H%M") + "_{}_length_tot.png".format(short_name)
     fig.savefig(savename, dpi=250)
     plt.close()
 
@@ -503,12 +505,14 @@ begin = datetime.datetime.strptime(args.daterange.split('-')[0], '%Y%m%d')
 end = datetime.datetime.strptime(args.daterange.split('-')[1], '%Y%m%d')
 station = args.station
 
-
 if args.station is not None:
-	config = 'config_{}.toml'.format(args.station)
+    config = 'config_{}.toml'.format(args.station)
+
+config_dict = toml.load(config)
+short_name = config_dict['station']['short_name']
 
 #filelist = gen_file_list(datetime.date(2016, 1, 22), datetime.date(2016, 1, 24), station)
-filelist = gen_file_list(begin, end, station)
+filelist = gen_file_list(begin, end, config_dict['output_dir'], short_name)
 for filename in filelist:
     print('=============================================================================')
     print('plotting file ', filename)

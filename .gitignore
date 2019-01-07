@@ -3,6 +3,14 @@
 .ipynb_checkpoints
 docs/build
 docs/build/doctrees/
+#
+upload_command.sh
+upload_plots.sh
+config_*
+!config_ps113.toml
+!config_limassol.toml
+data/Track_PS116.dat
+#
 trajectories/*
 !trajectories/.gitkeep
 output/*
