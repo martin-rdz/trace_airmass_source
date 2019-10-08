@@ -9,6 +9,16 @@
     4 = 'persia'
     5 = 'india'
 
+[arctic]
+    filename = 'data/geo_names_arctic.kml'
+[arctic.geo_names]
+    0 = 'cont_europe'
+    1 = 'north_america_w'
+    2 = 'north_america_e'
+    3 = 'far_east_deserts'
+    4 = 'persia'
+    5 = 'russian_east'
+
 [atlantic]
     filename = 'data/geo_names_atlantic.kml'
 [atlantic.geo_names]

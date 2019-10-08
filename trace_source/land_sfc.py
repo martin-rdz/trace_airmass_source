@@ -153,9 +153,12 @@ class land_sfc():
         if isinstance(lat, float):
             lat = [lat]
             lon = [lon]
-        if isinstance(lat, np.ndarray):
+        if isinstance(lat, np.ma.core.MaskedArray):
             lat = lat.filled(-999.).tolist()
             lon = lon.filled(-999.).tolist()
+        elif isinstance(lat, np.ndarray):
+            lat = lat.tolist()
+            lon = lon.tolist()
         # im[lat, lon]
 
         land_sfc_category = np.zeros((len(lat),))
@@ -252,10 +255,14 @@ class named_geography():
         if isinstance(lat, float):
             lat = [lat]
             lon = [lon]
-        if isinstance(lat, np.ndarray):
+        if isinstance(lat, np.ma.core.MaskedArray):
             lat = lat.filled(-999.).tolist()
             lon = lon.filled(-999.).tolist()
+        elif isinstance(lat, np.ndarray):
+            lat = lat.tolist()
+            lon = lon.tolist()
         # im[lat, lon]
+
 
         geo_id = np.zeros((len(lat),))
         geo_id[:] = -1

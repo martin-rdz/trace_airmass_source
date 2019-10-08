@@ -53,6 +53,7 @@ RUN pip3 install cartopy
 RUN pip3 install --upgrade Sphinx
 RUN pip3 install sphinx_rtd_theme
 RUN pip3 install recommonmark
+RUN pip3 install bcolz
 #RUN pip3 install m2r
 
 
@@ -64,3 +65,5 @@ RUN pip3 install recommonmark
 #RUN /etc/my_init.d/00_regen_ssh_host_keys.sh
 
 #EXPOSE 22
+
+EXPOSE 8890

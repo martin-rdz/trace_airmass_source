@@ -139,7 +139,8 @@ The second one - `geonames_config.toml` - is used to wire togehter the named geo
 
 
 ### License
-Copyright 2018, Martin Radenz
+See the LICENSE file for more information
+Copyright 2019, Martin Radenz
 [MIT License](http://www.opensource.org/licenses/mit-license.php)
 
 <!--

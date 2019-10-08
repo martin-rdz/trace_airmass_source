@@ -82,7 +82,8 @@ class gen_input():
             with open(self.config['station']["trackfile"]) as f:
                 reader = csv.reader(f, delimiter=' ')
                 for row in reader:
-                    dt = datetime.datetime.strptime(row[0]+" "+row[1], "%d.%m.%Y %H:%M:%S")
+                    #dt = datetime.datetime.strptime(row[0]+" "+row[1], "%d.%m.%Y %H:%M:%S")
+                    dt = datetime.datetime.strptime(row[0]+" "+row[1], "%Y-%m-%d %H:%M:%S")
                     coords = (float(row[2]), float(row[3]))
                     track_data[dt.strftime("%Y%m%d-%H%M")] = coords
 

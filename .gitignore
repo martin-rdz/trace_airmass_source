@@ -9,10 +9,12 @@ upload_plots.sh
 config_*
 !config_ps113.toml
 !config_limassol.toml
-data/Track_PS116.dat
+data/Track_*.dat
 #
 trajectories/*
 !trajectories/.gitkeep
+flexpart_partposit/*
+!flexpart_partposit/.gitkeep
 output/*
 !output/.gitkeep
 plots/*

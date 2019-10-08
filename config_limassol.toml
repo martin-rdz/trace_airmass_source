@@ -4,7 +4,8 @@
 
 output_dir = "output/limassol/"
 plot_dir = "plots/limassol"
-traj_dir = "trajectories/limassol/" 
+traj_dir = "trajectories/limassol/"
+partposit_dir = "flexpart_partposit/limassol/"
 
 geonames = 'standard'
 
@@ -15,6 +16,14 @@ geonames = 'standard'
     step = 3
     # duration of each trajectory
     tr_duration = -240
+
+[plotmap]
+    timeinterval = 6
+    heights = [1500.0, 3000.0, 4500.0, 6000.0]
+    #heights = [1500.0, 3000.0, 4500.0, 6000.0, 8000.0, 10000.0, 11000.0]
+    #heights = [8000.0, 10000.0, 11000.0]
+    bounds = [-120, 80, 0, 85]
+    centerlon = -10
 
 [height]
     top = 12000
