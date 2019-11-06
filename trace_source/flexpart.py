@@ -481,6 +481,171 @@ class assemble_time_height(trace_source.assemble_pattern):
         del ng
 
 
+def redistribute_rgb(r, g, b):
+    threshold = 255.999
+    m = max(r, g, b)
+    if m <= threshold:
+        return int(r), int(g), int(b)
+    total = r + g + b
+    if total >= 3 * threshold:
+        return int(threshold), int(threshold), int(threshold)
+    x = (3 * threshold - total) / (3 * m - total)
+    gray = threshold - x * m
+    return int(gray + x * r), int(gray + x * g), int(gray + x * b)
+
+
+
+
+
+def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None):
+    
+    release_sel = np.array([list(p) for p in part_pos if p[0]==release_no])
+    meta = traj['releases_meta'][release_no-1]
+      
+    import matplotlib
+    matplotlib.use('Agg')
+    import cartopy.crs as ccrs
+    import matplotlib.pyplot as plt
+    from fastkml import kml
+
+    if ls is None:
+        ls = trace_source.land_sfc.land_sfc()
+
+
+    if not os.path.isdir(savepath):
+        os.makedirs(savepath)
+
+    fig = plt.figure(figsize=(8, 10))
+    #fig = plt.figure(figsize=(15, 10))
+    # north pole
+    fig = plt.figure(figsize=(11, 10))
+
+    #ax = plt.axes(projection=ccrs.Miller(central_longitude=0.))
+    ax = plt.axes(projection=ccrs.NorthPolarStereo(central_longitude=45))
+
+    ####
+    # make a color map of fixed colors
+    colors = ['lightskyblue', 'darkgreen', 'khaki', 'palegreen', 'red', 'white', 'tan']
+    # better green for the light map
+    colors = ['lightskyblue', 'seagreen', 'khaki', '#6edd6e', 'darkmagenta', 'white', 'tan']
+    #colors = ['lightskyblue', 'seagreen', 'khaki', '#a4dd6e', 'red', 'white', 'tan']
+    cmap = matplotlib.colors.ListedColormap(colors)
+    
+    cs = []
+    for ind in range(cmap.N):
+        c = []
+        for x in cmap(ind)[:3]: 
+            c.append(x*1.1*255.)
+        cs.append([sc/255. for sc in redistribute_rgb(*c)])
+    print(cs)
+    cmap = matplotlib.colors.ListedColormap(cs)
+    
+    bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]
+    norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
+    ####
+    pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc, cmap=cmap, norm=norm, transform=ccrs.PlateCarree())
+    # high resolution coastlines
+    #ax.coastlines(resolution='110m')
+    ax.coastlines(resolution='50m')
+    # ax.coastlines(resolution='10m')
+    
+    # # The modis fire map
+    # from cartopy.io.shapereader import Reader
+    # from cartopy.feature import ShapelyFeature
+    # fname = '../data/DL_FIRE_M6_78471/fire_nrt_M6_78471.shp'
+
+    # shp_data = Reader(fname)
+    # print(next(shp_data.records()))
+    # frp = np.array([p.attributes['FRP'] for p in shp_data.records()])
+    # print(frp.shape, np.mean(frp), np.percentile(frp, [10,25,50,75,90]))
+
+    # points = [p for p in list(shp_data.records()) if p.attributes['FRP'] > 12]
+    # #points = sorted(points, key=lambda x: x.attributes['FRP'])
+
+    # scat = ax.scatter([p.geometry.x for p in points],
+    #                   [p.geometry.y for p in points],
+    #                   transform=ccrs.Geodetic(), s=1, 
+    #                   c='red')
+
+
+    scat = ax.scatter(release_sel[:,1], release_sel[:,2], s=2,
+                      c=release_sel[:,3]/1000., cmap='plasma',
+                      vmin=0.1, vmax=7.0,
+                      transform=ccrs.Geodetic())
+    
+    cbar = fig.colorbar(scat, fraction=0.025, pad=0.01)
+    
+    cbar.ax.set_ylabel('Height [km]', fontweight='semibold', fontsize=12)
+    cbar.ax.tick_params(axis='both', which='major', labelsize=12,
+                        width=2, length=4)
+    
+    # add the geometry boundaries...
+#     k = kml.KML()
+#     geo_bounds_file = '../../trace_pub/trace/data/geo_names_arctic.kml'
+#     with open(geo_bounds_file) as f:
+#         k.from_string(bytes(bytearray(f.read(), encoding='utf-8')))
+#     docu = list(k.features())[0]
+#     polygons = {}
+#     colors = [(0.65098039215686276, 0.84705882352941175, 0.32941176470588235, 1.0), 
+#               (1.0, 0.85098039215686272, 0.18431372549019609, 1.0), 
+#               (0.89803921568627454, 0.7686274509803922, 0.58039215686274515, 1.0),
+#               (0.40000000000000002, 0.76078431372549016, 0.6470588235294118, 1.0), 
+#               (0.9882352941176471, 0.55294117647058827, 0.3843137254901961, 1.0), 
+#               (0.55294117647058827, 0.62745098039215685, 0.79607843137254897, 1.0),  
+#               (0.70196078431372544, 0.70196078431372544, 0.70196078431372544, 1.0)]
+#     for p in list(docu.features()):
+#         print(p.name)
+#         #print(p.geometry)
+#         polygons[p.name] = p.geometry
+#     for i, (name, poly) in enumerate(list(polygons.items())):
+#         print(i, name)
+#         #ax.add_geometries([poly], ccrs.Geodetic(), alpha=0.5, facecolor=colors[i])
+#         ax.add_geometries([poly], ccrs.Geodetic(), edgecolor=colors[i], facecolor='none', lw=3)
+
+    
+
+
+    ax.gridlines(linestyle=':')
+    #     if config is not None and "bounds" in config['plotmap']:
+    #         ax.set_extent(config['plotmap']['bounds'], crs=ccrs.PlateCarree())
+    #     else:
+    #         # bounds for punta arenas
+    #ax.set_extent([-100, 80, 10, 80], crs=ccrs.PlateCarree())
+    ##ax.set_extent([-70, 50, 20, 55], crs=ccrs.PlateCarree())
+    ##ax.set_extent([-50, 40, 20, 55], crs=ccrs.PlateCarree())
+    ##ax.set_extent([20, 50, 20, 40], crs=ccrs.PlateCarree())
+    ##ax.set_extent([25, 35, 30, 40], crs=ccrs.PlateCarree())
+    # North Pole
+    #ax.set_extent([-180, 180, 45, 90], crs=ccrs.PlateCarree())
+    ax.set_extent([-179, 179, 45, 90], crs=ccrs.PlateCarree())
+    
+
+    ax.annotate("MODIS land cover classification [Broxton and Zeng 2014, JAMC]",
+                #xy=(.2, 0.105), xycoords='figure fraction',
+                xy=(.2, 0.085), xycoords='figure fraction',
+                horizontalalignment='left', verticalalignment='bottom',
+                fontsize=11)
+    # ax.annotate("MODIS Active Fire Product, FRP > 12 MW/pixel [DOI:10.5067/FIRMS/MODIS/MCD14DL.NRT.006]",
+    #             xy=(.2, 0.085), xycoords='figure fraction',
+    #             horizontalalignment='left', verticalalignment='bottom',
+    #             fontsize=11)
+
+    ax.set_title('Flexpart particle positions {}UTC\nRelease: [{:.2f} {:.2f} {:.2f} {:.2f}] {:.0f}-{:.0f}m'.format(
+        dt.strftime('%Y-%m-%d %H'),
+        *meta['lat_lon_bounds'], *meta['heights']),
+        fontweight='semibold', fontsize=13)
+
+    savename = savepath + "/" + "r{}_{}_{:.0f}_trajectories_map.png".format(
+        release_no, dt.strftime("%Y%m%d_%H"), np.mean(meta['heights']))
+    print(savename)
+    fig.savefig(savename, dpi=180)
+    plt.close('all')
+
+
+
+
+
+
 if __name__ == '__main__':
 
     config = 'config_limassol.toml'
@@ -489,6 +654,34 @@ if __name__ == '__main__':
     dt = datetime.datetime(2017,9,14)
     dt = datetime.datetime(2019,10,5)
     dt_range = (dt, dt + datetime.timedelta(hours=23))
-    ath = assemble_time_height(config_file=config)
-    ath.assemble(dt_range=dt_range)
-    ath.dump2netcdf(model_str='flex')
+    #ath = assemble_time_height(config_file=config)
+    #ath.assemble(dt_range=dt_range)
+    #ath.dump2netcdf(model_str='flex')
+
+
+    with open(config) as config_file:
+        config_dir = toml.loads(config_file.read())
+
+    end = datetime.datetime(2019, 10, 9, 3)
+    savepath = '{}{}_maps'.format(config_dir['plot_dir'], end.strftime('%Y%m%d_%H'))
+
+    print(savepath)
+    
+    #folder = '../../trace_pub/trace/flexpart_partposit/limassol/20170914_15/'
+    folder = config_dir['partposit_dir'] + '{}/'.format(end.strftime('%Y%m%d_%H'))
+    dt_range = [end-datetime.timedelta(days=10), end]
+
+    files = os.listdir(folder)
+    files = sorted([f for f in files if 'partposit' in f])
+    ls = trace_source.land_sfc.land_sfc()
+    print(files)
+    for f in files:
+
+        for i in range(9,20):
+            dt = datetime.datetime.strptime(f[10:], '%Y%m%d%H%M%S')
+            part_pos = read_partpositions(folder + f, 1, ctable=False)
+
+            traj = read_flexpart_traj_meta(folder + "trajectories.txt")
+            plot_part_loc_map(part_pos, i+1, dt, traj, savepath, ls=ls)
+        gc.collect()
+    # convert -scale 70% -coalesce -layers Optimize -delay 20 -loop 0 `ls r11*.png | sort -r` r11.gif

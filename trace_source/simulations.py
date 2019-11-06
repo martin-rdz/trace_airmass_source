@@ -14,7 +14,7 @@ import datetime
 from collections import defaultdict, Counter, namedtuple
 import numpy as np
 import toml
-import MySQLdb
+#import MySQLdb
 import csv
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../')

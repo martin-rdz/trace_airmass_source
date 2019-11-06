@@ -40,6 +40,7 @@ def plot_source_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, mo
     fig, axes = plt.subplots(1, no_plots, sharex=True, sharey=True, figsize=(12, 6))
     #fig, axes = plt.subplots(1, no_plots, sharex=True, sharey=True, figsize=(9, 6))
     ls_colors = ['lightskyblue', 'darkgreen', 'khaki', 'palegreen', 'red', 'gray', 'tan']
+    ls_colors = ['lightskyblue', 'seagreen', 'khaki', '#6edd6e', 'darkmagenta', 'gray', 'tan']
 
     for it, dt in enumerate(dt_list):
         no_occ = f.variables[parameter + '_no_below'][it, :]
@@ -268,7 +269,10 @@ def plot_geonames_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, 
     plt.close()
 
 
-def plot_source_height_profile(f, parameter, dt, it, config, savepath, config_dict):
+def plot_source_height_profile(f, parameter, dt, it, config, savepath, config_dict, model):
+
+    dsp = 'abs'
+
     time_list = f.variables["timestamp"][:]
     dt_list = [datetime.datetime.fromtimestamp(time) for time in time_list]
     height_list = f.variables["range"][:]
@@ -279,10 +283,15 @@ def plot_source_height_profile(f, parameter, dt, it, config, savepath, config_di
     occ_height = f.variables[parameter][it, :, :]
     occ_height = np.ma.masked_less(occ_height, 0)
     #print(occ_height)
+
+    if dsp == 'abs':
+        occ_height = occ_height*no_occ[:, np.newaxis]
+
     occ_left = np.cumsum(occ_height, axis=1)
     #print(occ_left)
 
     ls_colors = ['lightskyblue', 'darkgreen', 'khaki', 'palegreen', 'red', 'grey', 'tan']
+    ls_colors = ['lightskyblue', 'seagreen', 'khaki', '#6edd6e', 'darkmagenta', 'gray', 'tan']
 
     fig, ax = plt.subplots(1, figsize=(5, 7.5))
 
@@ -305,17 +314,38 @@ def plot_source_height_profile(f, parameter, dt, it, config, savepath, config_di
     ax.set_ylim([0, config['height']['plottop']/1000.])
     #ax.set_ylim([0, 10.25])
 
+    if dsp == 'abs':
+        if "2.0km" in parameter:
+            xright = 5000
+        else:
+            xright = 7000
+
+        if model == 'flex':
+            xright = 4e5
+        ax.set_xlim(right=xright)
+        if model != 'flex':
+            ax.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(3000))
+        else:
+            ax.xaxis.set_major_locator(matplotlib.ticker.AutoLocator())
+        ax.xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+    else:
+        ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
+
+    if dsp == 'abs':
+        no_xloc = xright*1.13
+    else:
+        no_xloc = 1.17
     for i, h in enumerate(height_list):
         if h < 10:
-            ax.text(1.17, h-0.15, int(no_occ.filled(0)[i]),
+            ax.text(no_xloc, h-0.15, int(no_occ.filled(0)[i]),
                     verticalalignment='bottom', horizontalalignment='right',
                     fontsize=11, fontweight='semibold')
 
     ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.5))
-    ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
+
     ax.set_title("{} {}".format(dt.strftime("%Y%m%d_%H"), parameter), 
                  fontweight='semibold', fontsize=15)
-    ax.set_xlabel("Portion", fontweight='semibold', fontsize=14)
+    ax.set_xlabel("Acc. residence time", fontweight='semibold', fontsize=14)
     ax.set_ylabel("Height [km]", fontweight='semibold', fontsize=14)
 
     ax.tick_params(axis='both', which='major', labelsize=14, 
@@ -325,7 +355,7 @@ def plot_source_height_profile(f, parameter, dt, it, config, savepath, config_di
                    direction='in')
 
     plt.tight_layout(rect=[0,0,0.92,1])
-    savename = savepath + "/" + dt.strftime("%Y%m%d_%H") + "_station_land_use_rel_{}.png".format(short_name, parameter)
+    savename = savepath + "/" + dt.strftime("%Y%m%d_%H") + "_{}_land-use-{}-{}.png".format(short_name, dsp, parameter.replace('_', '-'))
     fig.savefig(savename, dpi=250)
     plt.close()
 
@@ -543,9 +573,9 @@ def plot_filename(filename, config_dict, model, config_file='config.toml'):
     for dt in dt_list:
         it = dt_list.index(dt)
         #plot_source_height_profile(f, 'occ_belowmd', dt, it, config, savepath, config_dict)
-        plot_source_height_profile(f, 'occ_ens_belowmd', dt, it, config, savepath, config_dict)
+        plot_source_height_profile(f, 'occ_ens_belowmd', dt, it, config, savepath, config_dict, model)
         #plot_source_height_profile(f, 'occ_below2.0km', dt, it, config, savepath, config_dict)
-        plot_source_height_profile(f, 'occ_ens_below2.0km', dt, it, config, savepath, config_dict)
+        plot_source_height_profile(f, 'occ_ens_below2.0km', dt, it, config, savepath, config_dict, model)
 
     gc.collect()
 

@@ -21,6 +21,19 @@ import netCDF4
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../')
 import trace_source
 
+
+def redistribute_rgb(r, g, b):
+    threshold = 255.999
+    m = max(r, g, b)
+    if m <= threshold:
+        return int(r), int(g), int(b)
+    total = r + g + b
+    if total >= 3 * threshold:
+        return int(threshold), int(threshold), int(threshold)
+    x = (3 * threshold - total) / (3 * m - total)
+    gray = threshold - x * m
+    return int(gray + x * r), int(gray + x * g), int(gray + x * b)
+
 def plot_trajectories_ens(traj, savepath, ls=None, config=None):
     """
     plot multiple trajectories into one scene
@@ -44,7 +57,7 @@ def plot_trajectories_ens(traj, savepath, ls=None, config=None):
         ls = trace_source.land_sfc.land_sfc()
 
     colors = ['purple', 'darkorange', 'hotpink', 'dimgrey']
-    c = 'purple'
+    linecolor = 'grey'
 
     if not os.path.isdir(savepath):
         os.makedirs(savepath)
@@ -66,24 +79,48 @@ def plot_trajectories_ens(traj, savepath, ls=None, config=None):
 
     ####
     # make a color map of fixed colors
-    cmap = matplotlib.colors.ListedColormap(['lightskyblue', 'darkgreen', 'khaki', 'palegreen', 'red', 'white', 'tan'])
+    # cmap = matplotlib.colors.ListedColormap(['lightskyblue', 'darkgreen', 'khaki', 'palegreen', 'red', 'white', 'tan'])
+
+
+    # fainter colors as in the flexpart plot
+    colors = ['lightskyblue', 'seagreen', 'khaki', '#6edd6e', 'darkmagenta', 'lightgray', 'tan']
+    #colors = ['lightskyblue', 'seagreen', 'khaki', '#a4dd6e', 'red', 'white', 'tan']
+    cmap = matplotlib.colors.ListedColormap(colors)
+    cs = []
+    for ind in range(cmap.N):
+        c = []
+        for x in cmap(ind)[:3]: 
+            c.append(x*1.1*255.)
+        cs.append([sc/255. for sc in redistribute_rgb(*c)])
+    cmap = matplotlib.colors.ListedColormap(cs)
     bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]
     norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
+
     ####
-    pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc, cmap=cmap, norm=norm, transform=ccrs.PlateCarree())
+    pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc.astype(np.float64), cmap=cmap, norm=norm, transform=ccrs.PlateCarree())
     # high resolution coastlines
-    ax.coastlines(resolution='110m')
+    #ax.coastlines(resolution='110m')
+    ax.coastlines(resolution='50m')
     # ax.coastlines(resolution='10m')
 
     for k,v in traj.data.items():
         ax.plot(v['longitude'], v['latitude'],
-                linewidth=1.5,
-                color=c,
+                linewidth=0.7, zorder=2,
+                color=linecolor,
                 transform=ccrs.Geodetic())
 
-        ax.plot(v['longitude'][::24], v['latitude'][::24], '.',
-                color=c,
-                transform=ccrs.Geodetic())
+        # ax.plot(v['longitude'][::24], v['latitude'][::24], '.',
+        #         color='k',
+        #         transform=ccrs.Geodetic())
+        scat = ax.scatter(v['longitude'][::12], v['latitude'][::12], s=3,
+                      c=v['height'][::12]/1000., cmap='plasma',
+                      vmin=0.1, vmax=7.0, zorder=4,
+                      transform=ccrs.Geodetic())
+    
+    cbar = fig.colorbar(scat, fraction=0.025, pad=0.01)
+    cbar.ax.set_ylabel('Height [km]', fontweight='semibold', fontsize=12)
+    cbar.ax.tick_params(axis='both', which='major', labelsize=12,
+                        width=2, length=4)
 
     ax.gridlines(linestyle=':')
     if config is not None and "bounds" in config['plotmap']:

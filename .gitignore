@@ -28,3 +28,6 @@ plots/*
 .spyderworkspace
 *.lprof
 *.lprof~
+playground/*
+playground
+*.log
