@@ -549,17 +549,20 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None):
     ax.coastlines(resolution='50m')
     # ax.coastlines(resolution='10m')
     
-    # # The modis fire map
+    # # # The modis fire map
     # from cartopy.io.shapereader import Reader
     # from cartopy.feature import ShapelyFeature
-    # fname = '../data/DL_FIRE_M6_78471/fire_nrt_M6_78471.shp'
+    # # fname = '../data/DL_FIRE_M6_78471/fire_nrt_M6_78471.shp'
+    # fname = config_dir['partposit_dir'] + '20191130_DL_FIRE_V1_90092/fire_nrt_V1_90092.shp'
 
     # shp_data = Reader(fname)
     # print(next(shp_data.records()))
     # frp = np.array([p.attributes['FRP'] for p in shp_data.records()])
     # print(frp.shape, np.mean(frp), np.percentile(frp, [10,25,50,75,90]))
 
-    # points = [p for p in list(shp_data.records()) if p.attributes['FRP'] > 12]
+    # #points = [p for p in list(shp_data.records()) if p.attributes['FRP'] > 12]
+    # # for viirs pixel with their smaller size
+    # points = [p for p in list(shp_data.records()) if p.attributes['FRP'] > 4]
     # #points = sorted(points, key=lambda x: x.attributes['FRP'])
 
     # scat = ax.scatter([p.geometry.x for p in points],
@@ -629,6 +632,10 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None):
     #             xy=(.2, 0.085), xycoords='figure fraction',
     #             horizontalalignment='left', verticalalignment='bottom',
     #             fontsize=11)
+    #ax.annotate("VIIRS Active Fire Product, FRP > 4 MW/pixel [DOI:10.5067/FIRMS/VIIRS/VNP14IMGT.NRT.001]",
+    #        xy=(.2, 0.065), xycoords='figure fraction',
+    #        horizontalalignment='left', verticalalignment='bottom',
+    #        fontsize=11)
 
     ax.set_title('Flexpart particle positions {}UTC\nRelease: [{:.2f} {:.2f} {:.2f} {:.2f}] {:.0f}-{:.0f}m'.format(
         dt.strftime('%Y-%m-%d %H'),
@@ -663,6 +670,7 @@ if __name__ == '__main__':
         config_dir = toml.loads(config_file.read())
 
     end = datetime.datetime(2019, 10, 9, 3)
+    end = datetime.datetime(2019, 11, 30, 0)
     savepath = '{}{}_maps'.format(config_dir['plot_dir'], end.strftime('%Y%m%d_%H'))
 
     print(savepath)
@@ -677,7 +685,7 @@ if __name__ == '__main__':
     print(files)
     for f in files:
 
-        for i in range(9,20):
+        for i in range(10,11):
             dt = datetime.datetime.strptime(f[10:], '%Y%m%d%H%M%S')
             part_pos = read_partpositions(folder + f, 1, ctable=False)
 
@@ -685,3 +693,4 @@ if __name__ == '__main__':
             plot_part_loc_map(part_pos, i+1, dt, traj, savepath, ls=ls)
         gc.collect()
     # convert -scale 70% -coalesce -layers Optimize -delay 20 -loop 0 `ls r11*.png | sort -r` r11.gif
+    # 

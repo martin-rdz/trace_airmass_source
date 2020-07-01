@@ -17,7 +17,8 @@ parser.add_argument('--station', help='station name like limassol, barbados or m
 args = parser.parse_args()
 
 
-if args.station is not None and args.station != 'limassol':
+#if args.station is not None and args.station != 'limassol':
+if args.station is not None:
 	config = 'config_{}.toml'.format(args.station)
 else:
 	config = 'config.toml'

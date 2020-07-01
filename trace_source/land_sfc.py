@@ -48,7 +48,7 @@ class land_sfc():
     MODIS Category     simplified
     ===============   =========================
     0                  0 water
-    1,2,3,4,5,6        1 forrest
+    1,2,3,4,5,6        1 forest
     7,8,9              2 savanna, shrubland
     10, 11, 12, 14     3 grass, cropland
     13                 4 urban
@@ -133,7 +133,7 @@ class land_sfc():
         # desert
         self.land_sfc[im == 16] = 6
 
-        self.categories = {0:'water',1:'forrest',2:'savanna/shrub',
+        self.categories = {0:'water',1:'forest',2:'savanna/shrub',
                            3:'grass/crop',4:'urban',5:'snow',6:'barren'}
 
 

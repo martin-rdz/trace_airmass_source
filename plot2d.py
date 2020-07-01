@@ -53,6 +53,10 @@ def plot_source_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, mo
 
         categories = ast.literal_eval(f.variables[parameter].comment)
 
+        # fix the typo
+        if categories[1] == 'forrest':
+            categories[1] == 'forest'
+
         l1 = axes[it].barh(height_list, occ_height[:, 0].T, 
                            align='center', height=0.35, color=ls_colors[0], edgecolor='none')
         l2 = axes[it].barh(height_list, occ_height[:, 1].T, left=occ_left[:, 0].T,

@@ -10,8 +10,10 @@ partposit_dir = "flexpart_partposit/limassol/"
 geonames = 'standard'
 
 [time]
-    begin = '2018-03-14_00'
-    end = '2018-03-25_00'
+    #begin = '2018-03-14_00'
+    #end = '2018-03-25_00'
+    begin = '2015-09-09_00'
+    end = '2015-09-14_00'
     # time step for which trajectories are calculated
     step = 3
     # duration of each trajectory

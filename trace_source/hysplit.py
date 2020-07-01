@@ -352,6 +352,7 @@ class trajectory():
 
         #parameters_key = ["PRESSURE", "AIR_TEMP", "RAINFALL", "RELHUMID", "TERR_MSL"]
         parameters_key = ["PRESSURE", "AIR_TEMP", "RAINFALL", "MIXDEPTH", "RELHUMID", "TERR_MSL"]
+        #parameters_key = ["PRESSURE", "THETA", "AIR_TEMP", "RAINFALL", "MIXDEPTH", "RELHUMID", "TERR_MSL"]
 
         # empty dict for the ensemble trajectories
         data = defaultdict(lambda: {'time': [], 'latitude': [], 'longitude': [],
@@ -370,7 +371,7 @@ class trajectory():
 
             arr = np.empty((no_traj, 241))
             arr.fill(-999.)
-            arrp = np.empty((no_traj, 241, 6))
+            arrp = np.empty((no_traj, 241, len(parameters_key)))
             arrp.fill(-999.)
             arr_data = {'latitude':arr.copy(), 'longitude':arr.copy(),
                         'height':arr.copy(), 'parameters':arrp.copy()}
