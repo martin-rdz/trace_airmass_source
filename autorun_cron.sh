@@ -19,15 +19,16 @@ echo $stations
 
 
 
-if [ "$stations" == "all" ] || [ "stations" == "punta" ]; then
-  python3 test_data_avail.py --station punta --daterange $daterange
+if [ "$stations" == "all" ] || [ "$stations" == "punta" ]; then
+  echo "start punta ${daterange} ${stations}" 
+  #python3 test_data_avail.py --station punta --daterange $daterange
   python3 run_assemble_hysplit.py --station punta --daterange $daterange
   python3 plot2d.py --station punta --daterange $daterange
   #python3 compress_data.py --station punta --daterange 20181210-20181221
 fi
 
 
-if [ "$stations" == "all" ] || [ "stations" == "pollytau" ]; then
+if [ "$stations" == "all" ] || [ "$stations" == "pollytau" ]; then
   python3 test_data_avail.py --station pollytau --daterange $daterange
   python3 run_assemble_hysplit.py --station pollytau --daterange $daterange
   python3 plot2d.py --station pollytau --daterange $daterange

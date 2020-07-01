@@ -5,6 +5,7 @@
 output_dir = "output/ps113/" 
 plot_dir = "plots/ps113" 
 traj_dir = "trajectories/ps113/" 
+partposit_dir = "flexpart_partposit/ps113/"
 
 geonames = 'atlantic'
 
