@@ -10,6 +10,14 @@ config_*
 !config_ps113.toml
 !config_limassol.toml
 data/Track_*.dat
+data/gfs_083.2/*
+!data/gfs_083.2/.gitkeep
+server_logins.toml
+#
+flexpart_simulations/AVAILABLE
+flexpart_simulations/COMMAND
+flexpart_simulations/pathnames
+flexpart_simulations/RELEASES
 #
 trajectories/*
 !trajectories/.gitkeep

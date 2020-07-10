@@ -91,7 +91,7 @@ def plot_source_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, mo
                 xright = 7000
 
             if model == 'flex':
-                xright = 4e5
+                xright = 4.5e4
             axes[it].set_xlim(right=xright)
             dsp_text = 'acc. residence time'
             if model != 'flex':
@@ -212,7 +212,7 @@ def plot_geonames_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, 
             else:
                 xright = 7000
             if model == 'flex':
-                xright = 4e5
+                xright = 4.5e4
             axes[it].set_xlim(right=xright)
             dsp_text = 'acc. residence time'
             if model != 'flex':
@@ -273,6 +273,123 @@ def plot_geonames_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, 
     plt.close()
 
 
+
+def plot_lat_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, model):
+
+
+    #geo_names = {int(k): v for k, v in geo_config[config['geonames']]['geo_names'].items()}
+    #assert geo_names == ast.literal_eval(f.variables[parameter].comment), "geonames not matching {}".format(str(geo_names))
+    lat_names = {0: 'N -60', 1: 'S -60'}
+
+    NUM_COLORS = f.variables[parameter].shape[-1]
+    cm = plt.get_cmap('Set2')
+    cNorm  = matplotlib.colors.Normalize(vmin=0, vmax=NUM_COLORS-1)
+    scalarMap = matplotlib.cm.ScalarMappable(norm=cNorm, cmap=cm)
+    colors = [scalarMap.to_rgba(i) for i in range(NUM_COLORS)]
+
+    time_list = f.variables["timestamp"][:]
+    dt_list = [datetime.datetime.fromtimestamp(time) for time in time_list]    
+    height_list = f.variables["range"][:]
+    no_plots = len(dt_list)
+
+    fig, axes = plt.subplots(1, no_plots, sharex=True, sharey=True, figsize=(12, 6))
+    #fig, axes = plt.subplots(1, no_plots, sharex=True, sharey=True, figsize=(9, 6))
+
+    for it, dt in enumerate(dt_list):
+        no_occ = f.variables[parameter + '_no_below'][it, :]
+        no_occ = np.ma.masked_less(no_occ, 0)
+        occ_height = f.variables[parameter][it, :, :]
+        occ_height = np.ma.masked_less(occ_height, 0)
+        if dsp == 'abs':
+            occ_height = occ_height*no_occ[:, np.newaxis]
+        occ_left = np.cumsum(occ_height, axis=1)
+
+        l = []
+        for i in range(NUM_COLORS):
+            if i == 0:
+                l.append(axes[it].barh(height_list, occ_height[:, 0].T, left=0, 
+                    align='center', height=0.3, color=colors[0], edgecolor='none'))
+            else:
+                l.append(axes[it].barh(height_list, occ_height[:, i].T, left=occ_left[:, i-1].T,
+                    align='center', height=0.3, color=colors[i], edgecolor='none'))
+
+        axes[it].set_ylim([0, 12])
+        axes[it].set_ylim([0, config['height']['plottop']/1000.])
+        axes[it].tick_params(axis='y', which='major', labelsize=14, 
+                             width=1.5, length=3)
+        axes[it].tick_params(axis='both', which='minor', width=1, length=2)
+        axes[it].tick_params(axis='both', which='both', right=True, top=True,
+                             direction='in')
+        axes[it].yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1.0))
+        axes[it].set_xlabel(dt.strftime('%H:%M'), fontsize=14)
+        
+
+        if dsp == 'abs':
+            if "2.0km" in parameter:
+                xright = 5000
+            else:
+                xright = 7000
+            if model == 'flex':
+                xright = 4.5e4
+            axes[it].set_xlim(right=xright)
+            dsp_text = 'acc. residence time'
+            if model != 'flex':
+                axes[it].xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(3000))
+            else:
+                axes[it].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())
+            axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+        elif dsp == 'rel':
+            xright = 1.
+            axes[it].set_xlim(right=xright)
+            dsp_text = 'rel. residence time'
+        #axes[it].xaxis.set_minor_locator(matplotlib.ticker.FixedLocator([0, xright]))
+        axes[it].tick_params(axis='x', labeltop='off', labelbottom='off')
+
+
+    axes[0].set_ylabel("Height [km]", fontweight='semibold', fontsize=14)
+    axes[-1].tick_params(axis='x', labeltop='on', labelbottom='off', labelsize=11)
+    plt.suptitle("{}   {}   {}".format(dt.strftime("%Y%m%d"), config_dict['station']["name"], parameter), 
+                 fontweight='semibold', fontsize=15)
+    if 'moving' in config_dict['station'].keys() and config_dict['station']['moving']:
+        pass
+    else:
+        axes[-1].annotate("Endpoint: {:.1f} {:.1f} ".format(config_dict['station']["lat"], 
+                                                            config_dict['station']["lon"]), 
+                        xy=(.91, 0.96), xycoords='figure fraction',
+                        horizontalalignment='center', verticalalignment='bottom',
+                        fontsize=12)
+    axes[-1].annotate("{} ".format(model), 
+                      xy=(.91, 0.925), xycoords='figure fraction',
+                      horizontalalignment='center', verticalalignment='bottom',
+                      fontsize=12)
+    axes[0].annotate('Time UTC', xy=(.5, .0),
+                     xycoords='figure fraction',
+                     horizontalalignment='center', verticalalignment='bottom',
+                     fontsize=14, fontweight='semibold')
+    axes[-1].annotate(dsp_text, xy=(.90, 0.86),
+                      xycoords='figure fraction',
+                      horizontalalignment='center', verticalalignment='bottom',
+                      fontsize=12, fontweight='semibold')
+
+    fig.legend(l, list(lat_names.values()),
+               loc='upper left',
+               #bbox_to_anchor=(0.01, 0.952),
+               bbox_to_anchor=(0.01, 0.947),
+               ncol=5, fontsize=12, framealpha=0.8)
+    #fig.set_tight_layout({'rect': [0, 0, 1, 1], 'pad': 0.1, 'h_pad': 1.5})
+    #plt.tight_layout(w_pad=0.0002)
+
+    #plt.tight_layout(rect=[0, 0.02, 1, 0.93])
+    #plt.tight_layout(rect=[0, 0.02, 1, 0.90])
+    plt.tight_layout(rect=[0, 0.02, 1, 0.88])
+    fig.subplots_adjust(wspace=0)
+
+    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_multi-lat-{}-{}.png".format(short_name, dsp, parameter.replace('_', '-'))
+    fig.savefig(savename, dpi=400)
+    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_multi-lat-{}-{}.svg".format(short_name, dsp, parameter.replace('_', '-'))
+    fig.savefig(savename)
+    plt.close()
+
 def plot_source_height_profile(f, parameter, dt, it, config, savepath, config_dict, model):
 
     dsp = 'abs'
@@ -325,7 +442,7 @@ def plot_source_height_profile(f, parameter, dt, it, config, savepath, config_di
             xright = 7000
 
         if model == 'flex':
-            xright = 4e5
+            xright = 4.5e4
         ax.set_xlim(right=xright)
         if model != 'flex':
             ax.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(3000))
@@ -383,6 +500,7 @@ def plot_filename(filename, config_dict, model, config_file='config.toml'):
             config['plot_dir'], dt_list[0].strftime('%Y%m%d'), model)
     else:
         savepath = '{}/{}/'.format(config['plot_dir'], dt_list[0].strftime('%Y%m%d'))
+    print('savepath ', savepath)
     if not os.path.isdir(savepath):
         os.makedirs(savepath)
 
@@ -574,6 +692,8 @@ def plot_filename(filename, config_dict, model, config_file='config.toml'):
             plot_geonames_2d(f, 'region_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
             plot_geonames_2d(f, 'region_ens_below'+rh_string, dt_list, 'rel', config, savepath, config_dict, model)
 
+            plot_lat_2d(f, 'lat_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
+
     for dt in dt_list:
         it = dt_list.index(dt)
         #plot_source_height_profile(f, 'occ_belowmd', dt, it, config, savepath, config_dict)
@@ -585,14 +705,18 @@ def plot_filename(filename, config_dict, model, config_file='config.toml'):
 
 parser = argparse.ArgumentParser(description='Plot trace output')
 parser.add_argument('--station', help='station name like limassol, barbados or mcmurdo', required=True)
-parser.add_argument('--daterange', help='date range in the format YYYYMMDD-YYYMMDD', required=True)
+parser.add_argument('--date', help='date in the format YYYYMMDD')
+parser.add_argument('--daterange', help='date range in the format YYYYMMDD-YYYMMDD')
 parser.add_argument('--model', help='model to plot, default hysplit', default='hysplit')
 
 args = parser.parse_args()
 
-
-begin = datetime.datetime.strptime(args.daterange.split('-')[0], '%Y%m%d')
-end = datetime.datetime.strptime(args.daterange.split('-')[1], '%Y%m%d')
+if args.date is not None:
+    begin = datetime.datetime.strptime(args.date, '%Y%m%d')
+    end = begin
+if args.daterange is not None:
+    begin = datetime.datetime.strptime(args.daterange.split('-')[0], '%Y%m%d')
+    end = datetime.datetime.strptime(args.daterange.split('-')[1], '%Y%m%d')
 station = args.station
 
 if args.station is not None:

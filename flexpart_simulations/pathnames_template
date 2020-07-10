@@ -1,0 +1,18 @@
+${control_dir}
+${out_dir}
+${data_dir}
+${available_file}
+============================================
+
+Line 1: path where control files "COMMAND" and "RELEASES" are available
+Line 2: name of directory where output files are generated
+Line 3: path where meteorological fields are available (mother grid)
+Line 4: full filename of "AVAILABLE"-file (mother grid)
+
+Subsequent lines:
+Line 2n+3: path where meteorological fields are available (nested grid n)
+Line 2n+4: full filename of "AVAILABLE"-file (nested grid n)
+
+Line below last pathname must be:
+============================================
+

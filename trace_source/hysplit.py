@@ -115,7 +115,7 @@ def plot_trajectories_ens(traj, savepath, ls=None, config=None):
         scat = ax.scatter(v['longitude'][::12], v['latitude'][::12], s=3,
                       c=v['height'][::12]/1000., cmap='plasma',
                       vmin=0.1, vmax=7.0, zorder=4,
-                      transform=ccrs.Geodetic())
+                      transform=ccrs.PlateCarree())
     
     cbar = fig.colorbar(scat, fraction=0.025, pad=0.01)
     cbar.ax.set_ylabel('Height [km]', fontweight='semibold', fontsize=12)
@@ -255,6 +255,15 @@ class assemble_time_height(trace_source.assemble_pattern):
                                                          len(self.height_list),
                                                          no_geo_names)))
 
+                                                        
+        self.lat_names = {0: '', 1: ''}
+        self.statlat_dict = defaultdict(lambda: np.zeros((len(self.dt_list),
+                                                         len(self.height_list),
+                                                         len(list(self.lat_names.keys())))))
+        # print(self.statlat_dict[0])
+        # print(self.statlat_dict.get(0).shape)
+        # input()
+
         ls = trace_source.land_sfc.land_sfc()
         self.ls_categories = ls.categories
 
@@ -289,6 +298,8 @@ class assemble_time_height(trace_source.assemble_pattern):
                 traj.add_land_sfc(ls, silent=True)
                 traj.add_ensemble_land_sfc(ls)
                 traj.add_ensemble_geo_names(ng)
+                # TODO add config switch here
+                traj.add_ensemble_lat_thres()
                 #traj.add_area_land_sfc('md', ls, silent=True)
                 #traj.add_area_land_sfc(2000, ls, silent=True)
 
@@ -317,6 +328,13 @@ class assemble_time_height(trace_source.assemble_pattern):
                     print('stat gn ', k, traj.stat_gn[k])
                     self.statgn_dict[k][it, ih] = list(traj.stat_gn[k].counter.values())
 
+                # TODO make the lat statistics optional
+                for k in list(traj.stat_lat.keys()):
+                    self.stat2d_dict[k+'_no_below'][it, ih] = traj.stat_lat[k].no_below
+                    print('stat lat ', k, traj.stat_lat[k])
+                    self.statlat_dict[k][it, ih] = list(traj.stat_lat[k].counter.values())
+                    print(self.statlat_dict[k][it, ih])
+
         # trying to free memory
         del ls
         del ng
@@ -336,6 +354,7 @@ class trajectory():
         self.statistics = {}
         self.stat_ls = {}
         self.stat_gn = {}
+        self.stat_lat = {}
         self.shapes = {}
         self.config = config
         
@@ -518,7 +537,6 @@ class trajectory():
         Args:
             ls (:class:`trace_source.land_sfc.land_sfc`, optional): pre loaded land surface information
                 (separate loading consumes lot of time)
-            silent (bool, optional): verbose output or not
 
         """
 
@@ -556,7 +574,6 @@ class trajectory():
         Args:
             ng (:class:`trace_source.land_sfc.named_geography`, optional): pre loaded named geography information
                 (separate loading consumes lot of time)
-            silent (bool, optional): verbose output or not
 
         """
 
@@ -571,7 +588,7 @@ class trajectory():
             categories = np.empty((0,))
             for k, v in self.data.items():
                 category = ng.get_geo_names(v['latitude'], 
-                                        v['longitude']) 
+                                            v['longitude'])
                 if rh == 'md':
                     cat = category[v['height'] < v['MIXDEPTH']]
                 else:
@@ -585,6 +602,42 @@ class trajectory():
             else:
                 rh_string = rh
             self.stat_gn['region_ens_below' + rh_string] = occ_stat(no_below=no, counter=c)
+
+
+    def add_ensemble_lat_thres(self):
+        """
+        add the latitude threshold to a ensemble trajectory
+            
+        Args:
+            silent (bool, optional): verbose output or not
+
+        """
+
+        if self.info['no_traj'] == 1:
+            raise ValueError('tried to call add_ensemble_land_sfc with single traj')
+
+        occ_stat = namedtuple('occ_stat', 'no_below counter')
+        
+        for rh in self.config['height']['reception']:
+            categories = np.empty((0,))
+            for k, v in self.data.items():
+                category = v['latitude'] < -60
+                category = category.astype(int)
+ 
+                if rh == 'md':
+                    cat = category[v['height'] < v['MIXDEPTH']]
+                else:
+                    cat = category[v['height'] < float(rh)*1000]
+                categories = np.append(categories, cat)
+
+            no = float(categories.shape[0]) if categories.shape[0] > 0 else -1
+            c = {x: categories.tolist().count(x)/float(no) for x in [0, 1]}
+            if rh != 'md':
+                rh_string = rh + 'km'
+            else:
+                rh_string = rh
+            self.stat_lat['lat_ens_below' + rh_string] = occ_stat(no_below=no, counter=c)
+
 
 
     def add_area_land_sfc(self, maxheight, ls=None, silent=False):

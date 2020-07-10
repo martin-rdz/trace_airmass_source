@@ -225,6 +225,7 @@ class flex_statistics():
         self.statistics = {}
         self.stat_ls = {}
         self.stat_gn = {}
+        self.stat_lat = {}
 
         self.config = config
         if ng is None:
@@ -239,6 +240,7 @@ class flex_statistics():
 
         self.gn_categories = defaultdict(lambda: np.empty((0,)))
         self.ls_categories = defaultdict(lambda: np.empty((0,)))
+        self.thres_categories = defaultdict(lambda: np.empty((0,)))
 
 
     def add_partposits_ls(self, array):
@@ -317,6 +319,41 @@ class flex_statistics():
 
 
 
+    def add_partposits_thres(self, array):
+        """
+        """
+
+        for rh in self.config['height']['reception']:
+            if rh == 'md':
+                coords = array[array[:,3] < array[:,9]]
+            else:
+                coords = array[array[:,3] < float(rh)*1000]
+            # print('loop trough reception heights ', rh, coords.shape)
+
+            category = coords[:,2] < -60
+            category = category.astype(int)
+
+            self.thres_categories[rh] = np.append(self.thres_categories[rh], category)
+
+    def calc_thres_stat(self):
+        """
+        """
+
+        occ_stat = namedtuple('occ_stat', 'no_below counter')
+
+        for rh in self.config['height']['reception']:
+            cat_this_height = self.thres_categories[rh]
+            no = float(cat_this_height.shape[0]) if cat_this_height.shape[0] > 0 else -1
+            c = {x: cat_this_height.tolist().count(x)/float(no) for x in [0, 1]}
+
+            if rh != 'md':
+                rh_string = rh + 'km'
+            else:
+                rh_string = rh
+
+            print(rh_string, no, c)
+            self.stat_lat['lat_ens_below' + rh_string] = occ_stat(no_below=no, counter=c)
+
 
 
 
@@ -373,6 +410,13 @@ class assemble_time_height(trace_source.assemble_pattern):
                                                          len(self.height_list),
                                                          no_geo_names)))
 
+
+        self.lat_names = {0: '', 1: ''}
+        self.statlat_dict = defaultdict(lambda: np.zeros((len(self.dt_list),
+                                                         len(self.height_list),
+                                                         len(list(self.lat_names.keys())))))
+
+
         ls = trace_source.land_sfc.land_sfc()
         self.ls_categories = ls.categories
 
@@ -406,6 +450,7 @@ class assemble_time_height(trace_source.assemble_pattern):
                     flex_stat[ih].add_partposits_gn(release_sel)
 
                     flex_stat[ih].add_partposits_ls(release_sel)
+                    flex_stat[ih].add_partposits_thres(release_sel)
 
             # now assemble the statistics for all heights
             for ih, h in enumerate(self.height_list): 
@@ -420,6 +465,12 @@ class assemble_time_height(trace_source.assemble_pattern):
                     self.stat2d_dict[k+'_no_below'][it, ih] = flex_stat[ih].stat_ls[k].no_below
                     print('stat ls ', h, k, flex_stat[ih].stat_ls[k])
                     self.statls_dict[k][it, ih] = list(flex_stat[ih].stat_ls[k].counter.values())
+
+                flex_stat[ih].calc_thres_stat()
+                for k in list(flex_stat[ih].stat_lat.keys()):
+                    self.stat2d_dict[k+'_no_below'][it, ih] = flex_stat[ih].stat_lat[k].no_below
+                    print('stat_lat ', h, k, flex_stat[ih].stat_lat[k])
+                    self.statlat_dict[k][it, ih] = list(flex_stat[ih].stat_lat[k].counter.values())
 
 
             # #assert len(f_list) > 1

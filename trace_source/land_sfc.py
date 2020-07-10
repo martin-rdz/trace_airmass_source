@@ -71,7 +71,7 @@ class land_sfc():
             self.shape = src.shape
             self.transform = src.transform
 
-            T0 = src.affine
+            T0 = src.transform
             p1 = Proj(src.crs)
             print('T0 aka affine transformation ', T0)
             print('src.crs', src.crs)
@@ -91,12 +91,14 @@ class land_sfc():
 
         etemp, northings = T1 * (np.meshgrid(np.arange(1), np.arange(im.shape[0])))
         eastings, ntemp = T1 * (np.meshgrid(np.arange(im.shape[1]), np.arange(1)))
-        print(eastings, northings)
+        #print(eastings, northings)
 
-        # Project all longitudes, latitudes
-        p2 = Proj(proj='latlong', datum='WGS84')
-        _, lats = transform(p1, p2, etemp, northings)
-        longs, _ = transform(p1, p2, eastings, ntemp)
+        # the geotiff provided is already in WGS84
+        assert src.crs == 'EPSG:4326'
+        # # Project all longitudes, latitudes
+        # p2 = Proj(proj='latlong', datum='WGS84')
+        # _, lats = transform(p1, p2, etemp, northings)
+        # longs, _ = transform(p1, p2, eastings, ntemp)
 
 
         # slow version of the coordinate calculation
@@ -113,10 +115,10 @@ class land_sfc():
         # p2 = Proj(proj='latlong', datum='WGS84')
         # longs, lats = transform(p1, p2, eastings, northings)
 
-        if (longs == longs[0, :]).all():
-            self.longs = longs[0, :]
-        if (lats.T == lats[:, 0]).all():
-            self.lats = lats[:, 0]
+        if (eastings == eastings[0, :]).all():
+            self.longs = eastings[0, :]
+        if (northings.T == northings[:, 0]).all():
+            self.lats = northings[:, 0]
 
         self.land_sfc = im
         # high green
@@ -167,7 +169,6 @@ class land_sfc():
             if coord[0] == -999.:
                 land_sfc_category[i] = -1.
             else:
-                #print(coord)
                 ilat = nearest(coord[0], self.lats, -0.1)[0]
                 ilon = nearest(coord[1], self.longs, 0.1)[0]
 

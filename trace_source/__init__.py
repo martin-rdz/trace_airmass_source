@@ -141,6 +141,7 @@ class assemble_pattern():
         dim_age = dataset.createDimension('time_age', abs(self.config['time']['tr_duration'])+1)
         dim_cat = dataset.createDimension('categories', 7)
         dim_regions = dataset.createDimension('regions', len(list(self.geo_names.keys())))
+        dim_lats = dataset.createDimension('lat_thres', len(list(self.lat_names.keys())))
 
         # times_cn = dataset.createVariable('time', np.float32, ('time',))
         # times_cn[:] = hours_cn.astype(np.float32)
@@ -217,6 +218,22 @@ class assemble_pattern():
                                           'arr': self.statgn_dict.get(k),
                                           'long_name': modified_params[k]['long_name'],
                                           'comment': modified_params[k]['comment']})
+
+        # TODO make statlat optional statlat_dict
+        lat_data_keys = list(self.statlat_dict.keys())
+        print('lat_data_keys ', lat_data_keys)
+        modified_params = {key: {'var_name': key,
+                                 'long_name': "lat_thres " + key.lower(),
+                                 'comment': str(self.lat_names)} for key in lat_data_keys}
+        for k in lat_data_keys:
+            print("self.statlat_dict.keys()", self.statlat_dict.keys())
+            print(k, self.statlat_dict.get(k).shape)
+            dataset = save_item(dataset, {'var_name': modified_params[k]['var_name'],
+                                          'dimension': ('time', 'height', 'lat_thres'),
+                                          'arr': self.statlat_dict.get(k),
+                                          'long_name': modified_params[k]['long_name'],
+                                          'comment': modified_params[k]['comment']})
+
 
         # save_item(dataset, {'var_name': 'width', 'dimension': ('time', 'height'),
         #                     'arr': .corr_width_reg[:].filled(), 'long_name': "Spectral width",
