@@ -2,7 +2,11 @@
 ## trace: trajectory analysis tool
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2576558.svg)](https://doi.org/10.5281/zenodo.2576558)
 
-Ensemble backward trajectories are combined with a land cover classification for a temporally and vertically resolved airmass source attribution. At first, a 27-member ensemble of 10-day backward trajectories is calculated using HYSPLIT (Stein et al., 2015). Meteorological input data for HYSPLIT are taken from the GDAS1 dataset (<https://www.ready.noaa.gov/gdas1.php>) provided by the Air Resources Laboratory (ARL) of the U.S. National Weather Service’s National Centers for Environmental Prediction (NCEP). Each ensemble is generated using a small spatial offset in the trajectory endpoint. Whenever a trajectory is below the mixing depth provided in the GDAS1 data (“reception height”), the land cover is categorized using custom defined polygons according to land mass boundaries or a simplified version (number of categories reduced to 7) of the MODIS land cover classification (Friedl et al., 2002, Broxton et al., 2014). Hence, an airparcel is assumed to be influenced by the land surface if the trajectory is below the mixing depth. The residence time for each category is then the total time an airparcel fulfilled this criterion by land cover category. This calculation is repeated in steps of 3h in time and 500m in height to provide a continuous estimate on the airmass source and as a first hint on potential aerosol load.
+Ensemble backward trajectories are combined with a land cover classification for a temporally and vertically resolved airmass source attribution. 
+The trajectory information can be delivered by HYSPLIT (Stein et al., 2015) or FLEXPART (PISSO et al., 2019). 
+For HYSPLIT a 10-day 27-member ensemble setup is recommended. Each ensemble is generated using a small spatial offset in the trajectory endpoint. Meteorological input data for HYSPLIT are taken from the GDAS1 dataset (<https://www.ready.noaa.gov/gdas1.php>) provided by the Air Resources Laboratory (ARL) of the U.S. National Weather Service’s National Centers for Environmental Prediction (NCEP). 
+From FLEXPART a temporally resolved (e.g. every 3h) dump of the particle positions is required. Meteorological input data can be obtained from either UCAR or ECMWF.
+Whenever a airparcel is below the mixing depth (“reception height”), the land cover is categorized using custom defined polygons according to land mass boundaries or a simplified version (number of categories reduced to 7) of the MODIS land cover classification (Friedl et al., 2002, Broxton et al., 2014). Hence, an airparcel is assumed to be influenced by the land surface if the trajectory is below the mixing depth. The residence time for each category is then the total time an airparcel fulfilled this criterion by land cover category. This calculation is repeated in steps of 3h in time and 500m in height to provide a continuous estimate on the airmass source and as a first hint on potential aerosol load.
 From the results a time-height plot of airmass source can be generated for a certain location, which is comparable to active remote sensing time-height plots.
 
 Comprehensive documentation is available at [trace-doc](https://martin-rdz.github.io/trace-doc/)
@@ -21,7 +25,7 @@ Install all the packages listed in [requirements.txt](requirements.txt)
 
 #### docker container
 Deployment may be simplified using a docker image which includes all the dependencies.
-A Dockerfile is included in this repository.
+This docker container also includes Flexpart 10.4.
 
     # build the Dockerfile
     docker build -t trace_env .
@@ -31,6 +35,13 @@ A Dockerfile is included in this repository.
     docker run -v `pwd`/..:/trace -it trace_env /bin/bash
 
 Please put your credentials in the `output_meta.toml` file.
+The login credential for the gfs data from `rda.ucar.edu` should be stored in `server_logins.toml`
+
+```
+[flexpart]
+    login = ''
+    password = ''
+```
     
 
 ### Usage
