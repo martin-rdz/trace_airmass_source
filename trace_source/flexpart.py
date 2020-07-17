@@ -439,14 +439,14 @@ class assemble_time_height(trace_source.assemble_pattern):
             # 3. loop through heights
 
             for f in files_for_time:
-                print(f)
+                print('files_for_time ', f)
                 part_pos = read_partpositions(folder + f, 1, ctable=False)
 
                 for ih, h in enumerate(self.height_list):
-                    print("at ", ih, h)
+                    #print("at ", ih, h)
                     release_sel = np.array([list(p) for p in part_pos if p[0]==ih+1])
                     meta = traj_meta['releases_meta'][ih]
-                    print(meta)
+                    #print(meta)
                     flex_stat[ih].add_partposits_gn(release_sel)
 
                     flex_stat[ih].add_partposits_ls(release_sel)
@@ -548,7 +548,8 @@ def redistribute_rgb(r, g, b):
 
 
 
-def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None):
+def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, config=None):
+    """"""
     
     release_sel = np.array([list(p) for p in part_pos if p[0]==release_no])
     meta = traj['releases_meta'][release_no-1]
@@ -565,15 +566,25 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None):
 
     if not os.path.isdir(savepath):
         os.makedirs(savepath)
+    
+    if config['plotmap']['maptype'] == 'northpole':
+        fig = plt.figure(figsize=(11, 10))
+        if "centerlon" in config['plotmap']:
+            ax = plt.axes(projection=ccrs.NorthPolarStereo(central_longitude=config['plotmap']['centerlon']))
+        else:
+            ax = plt.axes(projection=ccrs.NorthPolarStereo(central_longitude=45))
 
-    fig = plt.figure(figsize=(8, 10))
-    #fig = plt.figure(figsize=(15, 10))
-    # north pole
-    fig = plt.figure(figsize=(11, 10))
-
-    #ax = plt.axes(projection=ccrs.Miller(central_longitude=0.))
-    ax = plt.axes(projection=ccrs.NorthPolarStereo(central_longitude=45))
-
+    if config['plotmap']['maptype'] == 'miller':
+        fig = plt.figure(figsize=(10, 7))
+        if "centerlon" in config['plotmap']:
+            ax = plt.axes(projection=ccrs.Miller(central_longitude=config['plotmap']['centerlon']))
+        else:
+            ax = plt.axes(projection=ccrs.Miller(central_longitude=0))
+    else:
+        print("using standard map")
+        fig = plt.figure(figsize=(10, 7))
+        ax = plt.axes(projection=ccrs.Miller(central_longitude=0))
+        
     ####
     # make a color map of fixed colors
     colors = ['lightskyblue', 'darkgreen', 'khaki', 'palegreen', 'red', 'white', 'tan']
@@ -657,13 +668,7 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None):
 #         ax.add_geometries([poly], ccrs.Geodetic(), edgecolor=colors[i], facecolor='none', lw=3)
 
     
-
-
     ax.gridlines(linestyle=':')
-    #     if config is not None and "bounds" in config['plotmap']:
-    #         ax.set_extent(config['plotmap']['bounds'], crs=ccrs.PlateCarree())
-    #     else:
-    #         # bounds for punta arenas
     #ax.set_extent([-100, 80, 10, 80], crs=ccrs.PlateCarree())
     ##ax.set_extent([-70, 50, 20, 55], crs=ccrs.PlateCarree())
     ##ax.set_extent([-50, 40, 20, 55], crs=ccrs.PlateCarree())
@@ -671,9 +676,16 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None):
     ##ax.set_extent([25, 35, 30, 40], crs=ccrs.PlateCarree())
     # North Pole
     #ax.set_extent([-180, 180, 45, 90], crs=ccrs.PlateCarree())
-    ax.set_extent([-179, 179, 45, 90], crs=ccrs.PlateCarree())
-    
 
+    assert config is not None
+    if config is not None and "bounds" in config['plotmap']:
+        ax.set_extent(config['plotmap']['bounds'], crs=ccrs.PlateCarree())
+
+    # if maptype == 'northpole':
+    #     ax.set_extent([-179, 179, 45, 90], crs=ccrs.PlateCarree())
+    # elif maptype == 'southernocean':
+    #     ax.set_extent([-179, 179, -75, -10], crs=ccrs.PlateCarree())
+    
     ax.annotate("MODIS land cover classification [Broxton and Zeng 2014, JAMC]",
                 #xy=(.2, 0.105), xycoords='figure fraction',
                 xy=(.2, 0.085), xycoords='figure fraction',
@@ -693,7 +705,7 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None):
         *meta['lat_lon_bounds'], *meta['heights']),
         fontweight='semibold', fontsize=13)
 
-    savename = savepath + "/" + "r{}_{}_{:.0f}_trajectories_map.png".format(
+    savename = savepath + "/" + "r{:0>2}_{}_{:.0f}_trajectories_map.png".format(
         release_no, dt.strftime("%Y%m%d_%H"), np.mean(meta['heights']))
     print(savename)
     fig.savefig(savename, dpi=180)
@@ -706,8 +718,8 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None):
 
 if __name__ == '__main__':
 
-    config = 'config_limassol.toml'
-    config = 'config_ps122.toml'
+    config_file = 'config_limassol.toml'
+    config_file = 'config_ps122.toml'
     #dt = datetime.datetime.strptime(args.date, '%Y%m%d')
     dt = datetime.datetime(2017,9,14)
     dt = datetime.datetime(2019,10,5)
@@ -717,17 +729,17 @@ if __name__ == '__main__':
     #ath.dump2netcdf(model_str='flex')
 
 
-    with open(config) as config_file:
-        config_dir = toml.loads(config_file.read())
+    with open(config_file) as f:
+        config = toml.loads(f.read())
 
     end = datetime.datetime(2019, 10, 9, 3)
     end = datetime.datetime(2019, 11, 30, 0)
-    savepath = '{}{}_maps'.format(config_dir['plot_dir'], end.strftime('%Y%m%d_%H'))
+    savepath = '{}{}_maps'.format(config['plot_dir'], end.strftime('%Y%m%d_%H'))
 
     print(savepath)
     
     #folder = '../../trace_pub/trace/flexpart_partposit/limassol/20170914_15/'
-    folder = config_dir['partposit_dir'] + '{}/'.format(end.strftime('%Y%m%d_%H'))
+    folder = config['partposit_dir'] + '{}/'.format(end.strftime('%Y%m%d_%H'))
     dt_range = [end-datetime.timedelta(days=10), end]
 
     files = os.listdir(folder)
@@ -741,7 +753,7 @@ if __name__ == '__main__':
             part_pos = read_partpositions(folder + f, 1, ctable=False)
 
             traj = read_flexpart_traj_meta(folder + "trajectories.txt")
-            plot_part_loc_map(part_pos, i+1, dt, traj, savepath, ls=ls)
+            plot_part_loc_map(part_pos, i+1, dt, traj, savepath, ls=ls, config=config)
         gc.collect()
     # convert -scale 70% -coalesce -layers Optimize -delay 20 -loop 0 `ls r11*.png | sort -r` r11.gif
     # 

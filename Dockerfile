@@ -8,7 +8,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get update && apt-get install -y \
   language-pack-en openssh-server vim software-properties-common \
   build-essential make gcc g++ zlib1g-dev git python3 python3-dev python3-pip \
-  pandoc python3-setuptools \
+  pandoc python3-setuptools imagemagick\
   gfortran autoconf libtool automake flex bison cmake git-core \
   libjpeg8-dev libfreetype6-dev libhdf5-serial-dev \
   libeccodes0 libeccodes-data libeccodes-dev \

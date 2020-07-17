@@ -63,8 +63,10 @@ def write_COMMAND(control_dir, begin, end):
         temp = t_file.read()
       
     t = string.Template(temp)
-    out_string = t.substitute(begin=begin.strftime("%Y%m%d %H%M%S"),
-                             end=end.strftime("%Y%m%d %H%M%S"))
+    out_string = t.substitute(begin_date=begin.strftime("%Y%m%d"),
+                              begin_time=begin.strftime("%H%M%S"),
+                              end_date=end.strftime("%Y%m%d"),
+                              end_time=end.strftime("%H%M%S"))
     #print(pathnames)
     with open(control_dir + 'COMMAND', 'w') as file:
         file.write(out_string)
