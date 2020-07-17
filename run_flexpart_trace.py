@@ -111,7 +111,7 @@ def write_RELEASES(control_dir, time, bbox, heights, no_part, comment):
 
 parser = argparse.ArgumentParser(usage="usage: %prog [date-interval]")
 #parser.add_option("interval", help="interval %Y%m%d-%Y%m%d")
-parser.add_argument("-m", "--model",
+parser.add_argument("-f", "--fields",
                   default='gfs1',
                   help="select the model data {gfs1, gfs0p25}")
 parser.add_argument('--station', help='station name like limassol, barbados or mcmurdo')
@@ -145,9 +145,9 @@ config = toml.load('config_{}.toml'.format(args.station))
 
 comment = 'trace {} '.format(args.station)
 
-if args.model == 'gfs1':
+if args.fields == 'gfs1':
     data_dir = "../data/gfs_083.2/"
-elif args.model == 'gfs0p25':
+elif args.fields == 'gfs0p25':
     data_dir = "../data/gfs_083.2/"
 else:
     raise ValueError
