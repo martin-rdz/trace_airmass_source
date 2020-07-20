@@ -13,9 +13,12 @@ from affine import Affine
 from pyproj import Proj, transform
 from fastkml import kml
 from shapely.geometry.point import Point
+import shapely.vectorized
 import toml
 
+from numba import jit
 
+@jit(nopython=True)
 def nearest(point, array, delta):
     """
     searches nearest point in given array and returns (i, array[i])
@@ -29,14 +32,48 @@ def nearest(point, array, delta):
     Returns: 
         ``(i, array[i])``
     """
-    # i = bisect.bisect_left(array, point)
-    i = int((point - array[0]) / delta)
-    # print("search nearest ", i, point, " | ", array[max(0,i-3):i+4])
+    ## i = bisect.bisect_left(array, point)
+    #i = int((point - array[0]) / delta)
+    ## print("search nearest ", i, point, " | ", array[max(0,i-3):i+4])
 
-    nearest = min(array[max(0, i - 50):i + 51], key=lambda t: abs(point - t))
+    #nearest = min(array[max(0, i - 10):i + 10], key=lambda t: abs(point - t))
 
-    i = np.where(array == nearest)[0][0]
-    return (i, nearest)
+    #i = np.where(array == nearest)[0][0]
+
+    i_calc = min(np.round((point - array[0])/delta), array.shape[0]-1)
+    #print(i, i_calc, point, array[i-1:i+2], (point - array[0])/delta)
+    #assert i == i_calc
+    i = int(i_calc)
+    #return (i, nearest)
+    return (i, array[i])
+
+
+def argnearest(value, array, delta):
+    """
+    """
+    i = np.searchsorted(array, value) - 1
+    if not i == array.shape[0] - 1:
+        if np.abs(array[i] - value) > np.abs(array[i + 1] - value):
+            i = i + 1
+
+    return (i, array[i])
+
+
+@jit(nopython=True)
+def fast_land_sfc(land_sfc_data, lat, lon, lats, longs):
+    land_sfc_category = np.zeros((len(lat),))
+
+    for i in range(len(lat)):
+        coord = (lat[i], lon[i])
+        if coord[0] == -999.:
+            land_sfc_category[i] = -1.
+        else:
+            ilat = nearest(coord[0], lats, -0.1)[0]
+            ilon = nearest(coord[1], longs, 0.1)[0]
+
+            land_sfc_category[i] = land_sfc_data[ilat, ilon]
+
+    return land_sfc_category
 
 
 class land_sfc():
@@ -120,25 +157,25 @@ class land_sfc():
         if (northings.T == northings[:, 0]).all():
             self.lats = northings[:, 0]
 
-        self.land_sfc = im
+        self.land_sfc_data = im
         # high green
-        self.land_sfc[(im >= 1) & (im <= 6)] = 1
+        self.land_sfc_data[(im >= 1) & (im <= 6)] = 1
         # med green
-        self.land_sfc[(im >= 7) & (im <= 9)] = 2
+        self.land_sfc_data[(im >= 7) & (im <= 9)] = 2
         # low green
-        self.land_sfc[(im >= 10) & (im <= 12)] = 3
-        self.land_sfc[im == 14] = 3
+        self.land_sfc_data[(im >= 10) & (im <= 12)] = 3
+        self.land_sfc_data[im == 14] = 3
         # urban
-        self.land_sfc[im == 13] = 4
+        self.land_sfc_data[im == 13] = 4
         # snow/ice
-        self.land_sfc[im == 15] = 5
+        self.land_sfc_data[im == 15] = 5
         # desert
-        self.land_sfc[im == 16] = 6
+        self.land_sfc_data[im == 16] = 6
 
         self.categories = {0:'water',1:'forest',2:'savanna/shrub',
                            3:'grass/crop',4:'urban',5:'snow',6:'barren'}
 
-
+    #@jit(nopython=True)
     def get_land_sfc(self, lat, lon):
         """
         get the land use pixel for a given coordinate
@@ -163,18 +200,14 @@ class land_sfc():
             lon = lon.tolist()
         # im[lat, lon]
 
-        land_sfc_category = np.zeros((len(lat),))
+        land_sfc_data = self.land_sfc_data.copy()
+        if lat:
+            cats = fast_land_sfc(land_sfc_data, lat, lon, self.lats.copy(), self.longs.copy())
+        else:
+            cats = np.array([])
+        return cats
 
-        for i, coord in enumerate(zip(lat, lon)):
-            if coord[0] == -999.:
-                land_sfc_category[i] = -1.
-            else:
-                ilat = nearest(coord[0], self.lats, -0.1)[0]
-                ilon = nearest(coord[1], self.longs, 0.1)[0]
 
-                land_sfc_category[i] = self.land_sfc[ilat, ilon]
-
-        return land_sfc_category
 
 
     def get_land_sfc_shape(self, shp):
@@ -200,6 +233,19 @@ class land_sfc():
 
         #print(masked_land_sfc.compressed())
         return masked_land_sfc
+
+
+@jit()
+def fast_geonames(geo_names_data, polygons, lat, lon):
+
+    geo_id = np.zeros((len(lat),))
+    geo_id[:] = -1
+
+    for j, name in geo_names_data.items():
+        is_within = shapely.vectorized.contains(polygons[name], lon, lat)
+        geo_id[is_within] = j
+
+    return geo_id
 
 
 class named_geography():
@@ -240,6 +286,7 @@ class named_geography():
         print('available geo names ', self.geo_names)
 
 
+    #@jit(nopython=True)
     def get_geo_names(self, lat, lon):
         """
         get the names defined in the shapefile for a given coordinate
@@ -264,13 +311,7 @@ class named_geography():
             lon = lon.tolist()
         # im[lat, lon]
 
-
-        geo_id = np.zeros((len(lat),))
-        geo_id[:] = -1
-        for i, coord in enumerate(zip(lat, lon)):
-            for j, name in self.geo_names.items():
-                if Point(coord[1], coord[0]).within(self.polygons[name]):
-                    geo_id[i] = j
+        geo_id = fast_geonames(self.geo_names, self.polygons, lat, lon)
 
         return geo_id
 

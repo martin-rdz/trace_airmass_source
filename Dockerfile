@@ -72,7 +72,7 @@ RUN pip3 install --upgrade pip
 RUN pip3 install cython
 RUN pip3 install ipython[notebook]
 RUN pip3 install --upgrade numpy
-RUN pip3 install scipy
+RUN pip3 install scipy==1.3.0
 RUN pip3 install numba
 RUN pip3 install matplotlib==2.0.2
 RUN pip3 install shapely --no-binary shapely
