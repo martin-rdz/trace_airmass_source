@@ -21,7 +21,7 @@ daterange=20190121-20190201
 # python3 run_assemble.py --model flex --station punta --date 20191231
 # python3 plot2d.py --model flex --station punta --date 20191231
 
-python3 download_gfs.py --daterange 20200615-20200627
-python3 run_flexpart_trace.py --station punta --date 20200626
-python3 run_assemble.py --model flex --station punta --date 20200626
-python3 plot2d.py --model flex --station punta --daterange 20200626-20200626
+python3 download_gfs.py --daterange 20200610-20200628
+python3 run_flexpart_trace.py --station punta --date 20200623
+python3 run_assemble.py --model flex --station punta --date 20200623
+python3 plot2d.py --model flex --station punta --date 20200623

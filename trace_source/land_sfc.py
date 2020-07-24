@@ -21,8 +21,7 @@ from numba import jit
 @jit(nopython=True)
 def nearest(point, array, delta):
     """
-    searches nearest point in given array and returns (i, array[i])
-    taken from BA programm an improved with index calculation
+    calculate the index directly
 
     Args:
         point (float): point to search for
@@ -59,19 +58,19 @@ def argnearest(value, array, delta):
     return (i, array[i])
 
 
-@jit(nopython=True)
+#@jit(nopython=True)
 def fast_land_sfc(land_sfc_data, lat, lon, lats, longs):
     land_sfc_category = np.zeros((len(lat),))
 
-    for i in range(len(lat)):
-        coord = (lat[i], lon[i])
-        if coord[0] == -999.:
-            land_sfc_category[i] = -1.
-        else:
-            ilat = nearest(coord[0], lats, -0.1)[0]
-            ilon = nearest(coord[1], longs, 0.1)[0]
-
-            land_sfc_category[i] = land_sfc_data[ilat, ilon]
+    land_sfc_category_new = np.zeros((len(lat),))
+    ilat = np.round((lat - lats[0])/-0.1).astype(int)
+    ilat[ilat >= lats.shape[0]-1] = lats.shape[0]-1
+    ilat[ilat < 0] = 0
+    ilon = np.round((lon - longs[0])/0.1).astype(int)
+    ilon[ilon >= longs.shape[0]-1] = longs.shape[0]-1
+    ilon[ilon < 0] = 0
+    land_sfc_category = land_sfc_data[ilat, ilon]
+    land_sfc_category[lat == -999.] = -1
 
     return land_sfc_category
 
@@ -176,6 +175,7 @@ class land_sfc():
                            3:'grass/crop',4:'urban',5:'snow',6:'barren'}
 
     #@jit(nopython=True)
+    #@profile
     def get_land_sfc(self, lat, lon):
         """
         get the land use pixel for a given coordinate
@@ -200,9 +200,9 @@ class land_sfc():
             lon = lon.tolist()
         # im[lat, lon]
 
-        land_sfc_data = self.land_sfc_data.copy()
+        land_sfc_data = self.land_sfc_data
         if lat:
-            cats = fast_land_sfc(land_sfc_data, lat, lon, self.lats.copy(), self.longs.copy())
+            cats = fast_land_sfc(land_sfc_data, lat, lon, self.lats, self.longs)
         else:
             cats = np.array([])
         return cats
@@ -287,6 +287,7 @@ class named_geography():
 
 
     #@jit(nopython=True)
+    #@profile
     def get_geo_names(self, lat, lon):
         """
         get the names defined in the shapefile for a given coordinate

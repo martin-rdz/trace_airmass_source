@@ -97,7 +97,7 @@ def plot_trajectories_ens(traj, savepath, ls=None, config=None):
     norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
 
     ####
-    pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc.astype(np.float64), cmap=cmap, norm=norm, transform=ccrs.PlateCarree())
+    pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc_data.astype(np.float64), cmap=cmap, norm=norm, transform=ccrs.PlateCarree())
     # high resolution coastlines
     #ax.coastlines(resolution='110m')
     ax.coastlines(resolution='50m')

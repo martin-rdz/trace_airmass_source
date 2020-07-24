@@ -360,7 +360,7 @@ class flex_statistics():
 
 class assemble_time_height(trace_source.assemble_pattern):
 
-
+    #@profile
     def assemble(self, dt_range=None):
         """
         assemble the statistics for a range of trajectories and
@@ -440,11 +440,15 @@ class assemble_time_height(trace_source.assemble_pattern):
 
             for f in files_for_time:
                 print('files_for_time ', f)
-                part_pos = read_partpositions(folder + f, 1, ctable=False)
+                part_pos = read_partpositions(folder + f, 1, ctable=True)
+                part_pos = np.array(part_pos)
 
                 for ih, h in enumerate(self.height_list):
                     #print("at ", ih, h)
-                    release_sel = np.array([list(p) for p in part_pos if p[0]==ih+1])
+                    this_population = np.where(part_pos[:,0] == ih+1)[0]
+                    #release_sel = np.array([list(p) for p in part_pos if p[0]==ih+1])
+                    release_sel = part_pos[this_population, :]
+                    #assert np.all(release_sel == other_release)
                     meta = traj_meta['releases_meta'][ih]
                     #print(meta)
                     flex_stat[ih].add_partposits_gn(release_sel)
@@ -605,7 +609,7 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, config=
     bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]
     norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
     ####
-    pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc, cmap=cmap, norm=norm, transform=ccrs.PlateCarree())
+    pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc_data, cmap=cmap, norm=norm, transform=ccrs.PlateCarree())
     # high resolution coastlines
     #ax.coastlines(resolution='110m')
     ax.coastlines(resolution='50m')
