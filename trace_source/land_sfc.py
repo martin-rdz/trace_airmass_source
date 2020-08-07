@@ -62,6 +62,7 @@ def argnearest(value, array, delta):
 def fast_land_sfc(land_sfc_data, lat, lon, lats, longs):
     land_sfc_category = np.zeros((len(lat),))
 
+
     land_sfc_category_new = np.zeros((len(lat),))
     ilat = np.round((lat - lats[0])/-0.1).astype(int)
     ilat[ilat >= lats.shape[0]-1] = lats.shape[0]-1

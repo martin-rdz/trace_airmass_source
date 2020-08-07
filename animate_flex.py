@@ -22,6 +22,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--station', help='station name like limassol, barbados or mcmurdo')
 parser.add_argument('--datetime', help='date in the format YYYYMMDD-HH')
 parser.add_argument('--levels', nargs='+', type=int)
+parser.add_argument('--dynamics', default='false', help='add the isobars/isoterms from the grib files')
 #parser.add_argument('--daterange', help='date range in the format YYYYMMDD-YYYMMDD')
 
 
@@ -54,6 +55,13 @@ else:
     raise ValueError
 print('levels ', args.levels)
 
+if args.dynamics == 'false':
+    add_dyn = False
+elif args.dynamics == 'true':
+    add_dyn = True
+else:
+    raise ValueError
+
 level_to_heights = {}
 
 for f in files[:]:
@@ -64,7 +72,8 @@ for f in files[:]:
 
         traj = trace_source.flexpart.read_flexpart_traj_meta(folder + "trajectories.txt")
         level_to_heights[i] = np.mean(traj['releases_meta'][i-1]['heights'])
-        trace_source.flexpart.plot_part_loc_map(part_pos, i, dt, traj, savepath, ls=ls, config=config)
+        trace_source.flexpart.plot_part_loc_map(part_pos, i, dt, traj, savepath, ls=ls, 
+                                                config=config, add_dyn=add_dyn)
     gc.collect()
 
 

@@ -78,6 +78,9 @@ RUN pip3 install matplotlib==2.0.2
 RUN pip3 install shapely --no-binary shapely
 RUN pip3 install pyshp
 RUN pip3 install six
+RUN pip3 install eccodes
+RUN pip3 install xarray
+RUN pip3 install cfgrib
 RUN pip3 install affine
 RUN pip3 install fastkml
 RUN pip3 install toml

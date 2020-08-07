@@ -552,7 +552,7 @@ def redistribute_rgb(r, g, b):
 
 
 
-def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, config=None):
+def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, config=None, add_dyn=True):
     """"""
     
     release_sel = np.array([list(p) for p in part_pos if p[0]==release_no])
@@ -636,10 +636,76 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, config=
     #                   transform=ccrs.Geodetic(), s=1, 
     #                   c='red')
 
+    # optionally add the dynamics from gfs grib
+    if add_dyn:
+        import xarray as xr
+
+        if dt.hour%6 == 0:
+            gribfile = f"data/gfs_083.2/{dt.strftime('%Y%m%d%H')}"
+            print(gribfile)
+
+            ds_isobaric = xr.load_dataset(
+                gribfile, 
+                engine='cfgrib', backend_kwargs={'filter_by_keys':{'typeOfLevel':'isobaricInhPa'}, 
+                                                'errors': 'ignore'})
+
+            ds_mean_sea = xr.load_dataset(
+                gribfile, 
+                engine='cfgrib', backend_kwargs={'filter_by_keys':{'typeOfLevel':'meanSea'}, 
+                                                'errors': 'ignore'})
+
+            prmsl = ds_mean_sea.prmsl
+            gh_500 = ds_isobaric.gh.sel(isobaricInhPa=500)
+
+
+        else:
+            print('shit')
+            gribfile1 = f"data/gfs_083.2/{(dt - datetime.timedelta(hours=3)).strftime('%Y%m%d%H')}"
+            gribfile2 = f"data/gfs_083.2/{(dt + datetime.timedelta(hours=3)).strftime('%Y%m%d%H')}"
+            print(gribfile1, gribfile2)
+
+            ds_isobaric = xr.load_dataset(
+                gribfile1, 
+                engine='cfgrib', backend_kwargs={'filter_by_keys':{'typeOfLevel':'isobaricInhPa'}, 
+                                                'errors': 'ignore'})
+
+            ds_mean_sea = xr.load_dataset(
+                gribfile1, 
+                engine='cfgrib', backend_kwargs={'filter_by_keys':{'typeOfLevel':'meanSea'}, 
+                                                'errors': 'ignore'})
+
+            
+            ds_isobaric2 = xr.load_dataset(
+                gribfile2, 
+                engine='cfgrib', backend_kwargs={'filter_by_keys':{'typeOfLevel':'isobaricInhPa'}, 
+                                                'errors': 'ignore'})
+
+            ds_mean_sea2 = xr.load_dataset(
+                gribfile2, 
+                engine='cfgrib', backend_kwargs={'filter_by_keys':{'typeOfLevel':'meanSea'}, 
+                                                'errors': 'ignore'})
+
+            prmsl = np.mean(np.dstack((ds_mean_sea.prmsl, ds_mean_sea2.prmsl)), axis=2)
+            gh_500 = np.mean(np.dstack((ds_isobaric.gh.sel(isobaricInhPa=500), 
+                                        ds_isobaric2.gh.sel(isobaricInhPa=500))), axis=2)
+
+
+        levels = np.arange(930,1050,4)
+        cont = ax.contour(ds_mean_sea.longitude, ds_mean_sea.latitude, 
+                        prmsl/100., linewidths=0.4,
+                        colors='lightcoral', transform=ccrs.PlateCarree(),
+                        levels=levels)
+
+        levels = np.arange(0,900,8)
+        cont = ax.contour(ds_isobaric.longitude, ds_isobaric.latitude, 
+                        gh_500/10., linewidths=0.4,
+                        colors='k', transform=ccrs.PlateCarree(),
+                        levels=levels)
+
 
     scat = ax.scatter(release_sel[:,1], release_sel[:,2], s=2,
                       c=release_sel[:,3]/1000., cmap='plasma',
-                      vmin=0.1, vmax=7.0,
+                      vmin=0.1, vmax=7.0, zorder=5,
                       transform=ccrs.Geodetic())
     
     cbar = fig.colorbar(scat, fraction=0.025, pad=0.01)
@@ -714,7 +780,6 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, config=
     print(savename)
     fig.savefig(savename, dpi=180)
     plt.close('all')
-
 
 
 

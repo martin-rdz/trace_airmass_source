@@ -688,9 +688,9 @@ def plot_filename(filename, config_dict, model, config_file='config.toml'):
             else:
                 rh_string = rh
             plot_source_2d(f, 'occ_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
-            plot_source_2d(f, 'occ_ens_below'+rh_string, dt_list, 'rel', config, savepath, config_dict, model)
+            #plot_source_2d(f, 'occ_ens_below'+rh_string, dt_list, 'rel', config, savepath, config_dict, model)
             plot_geonames_2d(f, 'region_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
-            plot_geonames_2d(f, 'region_ens_below'+rh_string, dt_list, 'rel', config, savepath, config_dict, model)
+            #plot_geonames_2d(f, 'region_ens_below'+rh_string, dt_list, 'rel', config, savepath, config_dict, model)
 
             plot_lat_2d(f, 'lat_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
 
