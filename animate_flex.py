@@ -85,7 +85,10 @@ for i in levels:
     fname_animation = "{}_{:.0f}_r{:0>2}_{}.gif".format(end.strftime('%Y%m%d_%H'), level_to_heights[i], i, args.station)
     command = "convert -scale 70% -coalesce -layers Optimize -delay 20 -loop 0 `ls r{:0>2}*.png | sort -r` {}".format(i, fname_animation)
     print('run: ', command)
-    process = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+    try:
+        process = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+    except:
+        print('convert returned error, but should have worked')
 
     # from flexpart module
     # convert -scale 70% -coalesce -layers Optimize -delay 20 -loop 0 `ls r11*.png | sort -r` r11.gif
