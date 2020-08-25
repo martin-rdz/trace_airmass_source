@@ -162,15 +162,21 @@ if not os.path.isdir(out_dir):
 
 refresh_AVAILABLE(data_dir)
 
-write_pathnames(os.getcwd(),
-                out_dir+"out/",
-                data_dir,
-                "AVAILABLE")
-
 for dt in dt_list[:]:
     print(dt)
-    if not os.path.isdir(out_dir+"out/"):
-        os.mkdir(out_dir+"out/")
+
+    final_out_dir = out_dir+dt.strftime("%Y%m%d_%H")+"/"
+    # remove if already available
+    if dt.strftime("%Y%m%d_%H") in os.listdir(out_dir):
+        shutil.rmtree(out_dir+dt.strftime("%Y%m%d_%H"))
+    if not os.path.isdir(final_out_dir):
+        os.mkdir(final_out_dir)
+
+    write_pathnames(os.getcwd(),
+                    final_out_dir,
+                    data_dir,
+                    "AVAILABLE")
+
     write_COMMAND(os.getcwd()+'/', dt-datetime.timedelta(days=10), dt)
 
     time = [dt-datetime.timedelta(minutes=5), dt]
@@ -205,8 +211,8 @@ for dt in dt_list[:]:
     process = subprocess.run('FLEXPART', shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
     print(process.stdout)
 
-    print('remove and rename ', out_dir+"out", out_dir+dt.strftime("%Y%m%d_%H"))
-    if dt.strftime("%Y%m%d_%H") in os.listdir(out_dir):
-        shutil.rmtree(out_dir+dt.strftime("%Y%m%d_%H"))
-    os.rename(out_dir+"out", out_dir+dt.strftime("%Y%m%d_%H"))
+    # print('remove and rename ', out_dir+"out", out_dir+dt.strftime("%Y%m%d_%H"))
+    # if dt.strftime("%Y%m%d_%H") in os.listdir(out_dir):
+    #     shutil.rmtree(out_dir+dt.strftime("%Y%m%d_%H"))
+    # os.rename(out_dir+"out", out_dir+dt.strftime("%Y%m%d_%H"))
 
