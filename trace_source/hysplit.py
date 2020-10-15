@@ -665,11 +665,6 @@ class trajectory():
                 category[60 <= lat] = 5
                 category = category.astype(int)
                 
-                if np.any(category == 0):
-                    print(mask.shape, mask)
-                    print(v['latitude'].shape, v['latitude'])
-                    print(category.shape, category)
- 
                 if rh == 'md':
                     cat = category[v['height'][~mask] < v['MIXDEPTH'][~mask]]
                 else:

@@ -14,11 +14,14 @@ scp hysplit@lidardaten.tropos.de:data/trajectories/${yest}/*.tdump .
 cd ../../
 #docker container ls
 #docker exec -ti trace_run bash -c "cd trace/trace && ./autorun_cron.sh"
-docker exec -i trace_run bash -c "cd trace/trace && ./autorun_cron.sh ${yest} punta"
+docker exec -i trace_run bash -c "cd trace/ && ./autorun_cron.sh ${yest} punta"
 
 year=${yest:0:4}
-scp plots/punta/${yest}/{*map.png,*prof.png,*-abs-*.png} cloudnet@rsd.tropos.de:data/punta-arenas/products/trace-backtrajectories/${year}/;
-scp output/punta/${yest}*.nc cloudnet@rsd.tropos.de:data/punta-arenas/products/trace-backtrajectories/${year}/;
+#scp plots/punta/${yest}/{*map.png,*prof.png,*-abs-*.png} cloudnet@rsd.tropos.de:data/punta-arenas/products/trace-backtrajectories/${year}/;
+#scp output/punta/${yest}*.nc cloudnet@rsd.tropos.de:data/punta-arenas/products/trace-backtrajectories/${year}/;
+# rsd2 upload
+scp plots/punta/${yest}/{*map.png,*prof.png,*-abs-*.png} cn_rsd2:data/punta-arenas/products/trace-airmass-source/${year}/;
+scp output/punta/${yest}*.nc cn_rsd2:data/punta-arenas/products/trace-airmass-source/${year}/;
 
 
 
@@ -29,7 +32,7 @@ scp hysplit@lidardaten.tropos.de:data/trajectories/${yest}_tel-aviv/*.tdump .
 cd ../../
 #docker container ls
 #docker exec -ti trace_run bash -c "cd trace/trace && ./autorun_cron.sh"
-docker exec -i trace_run bash -c "cd trace/trace && ./autorun_cron.sh ${yest} pollytau"
+docker exec -i trace_run bash -c "cd trace/ && ./autorun_cron.sh ${yest} pollytau"
 
 year=${yest:0:4}
 mon=${yest:4:2}
