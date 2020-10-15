@@ -114,7 +114,7 @@ def write_RELEASES(control_dir, time, bbox, heights, no_part, comment):
 
 
 
-parser = argparse.ArgumentParser(usage="usage: %prog [date-interval]")
+parser = argparse.ArgumentParser(usage="usage")
 #parser.add_option("interval", help="interval %Y%m%d-%Y%m%d")
 parser.add_argument("-f", "--fields",
                   default='gfs1',

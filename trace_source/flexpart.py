@@ -381,6 +381,7 @@ class assemble_time_height(trace_source.assemble_pattern):
         days_avail = os.listdir(traj_dir)
         # filter only for the trajectory files with tdump extension
         days_avail = [f for f in days_avail if len(f) == 11]
+        print(days_avail)
         folders = [f for f in days_avail if datetime.datetime.strptime(f, "%Y%m%d_%H") in self.dt_list]
 
         assert len(folders) > 0, 'no folders with flexpart partposit data'
