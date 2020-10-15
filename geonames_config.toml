@@ -37,6 +37,23 @@
     1 = 'western_canada'
     2 = 'eastern_canada'
     3 = 'russian_far_east'
+    
+[fire2]
+    filename = 'data/geo_names_fire2.kml'
+[fire2.geo_names]
+    0 = 'cont_europe'
+    1 = 'africa'
+    2 = 'north_america'
+    3 = 'russian_far_east'
+
+[fire3]
+    filename = 'data/geo_names_fire3.kml'
+[fire3.geo_names]
+    0 = 'cont_europe'
+    1 = 'africa'
+    2 = 'na_excl_west'
+    3 = 'russian_far_east'
+    4 = 'na_west_coast'
 
 [south]
     filename = 'data/geo_names_south.kml'

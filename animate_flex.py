@@ -12,6 +12,7 @@ import argparse
 import sys, os
 import gc
 import subprocess
+import traceback
 import numpy as np
 import toml
 sys.path.append("..")
@@ -73,7 +74,9 @@ for f in files[:]:
         traj = trace_source.flexpart.read_flexpart_traj_meta(folder + "trajectories.txt")
         level_to_heights[i] = np.mean(traj['releases_meta'][i-1]['heights'])
         trace_source.flexpart.plot_part_loc_map(part_pos, i, dt, traj, savepath, ls=ls, 
-                                                config=config, add_dyn=add_dyn)
+                                                config=config, 
+                                                add_dyn=add_dyn,
+                                                add_fire='M6_7452')
     gc.collect()
 
 
@@ -85,7 +88,18 @@ for i in levels:
     fname_animation = "{}_{:.0f}_r{:0>2}_{}.gif".format(end.strftime('%Y%m%d_%H'), level_to_heights[i], i, args.station)
     command = "convert -scale 70% -coalesce -layers Optimize -delay 20 -loop 0 `ls r{:0>2}*.png | sort -r` {}".format(i, fname_animation)
     print('run: ', command)
-    process = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+    try:
+        process = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+    except:
+        traceback.print_exc()
+
+    fname_animation = "{}_{:.0f}_r{:0>2}_{}_f.gif".format(end.strftime('%Y%m%d_%H'), level_to_heights[i], i, args.station)
+    command = "convert -scale 70% -coalesce -layers Optimize -delay 20 -loop 0 `ls r{:0>2}*.png | sort ` {}".format(i, fname_animation)
+    print('run: ', command)
+    try:
+        process = subprocess.run(command, shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+    except:
+        traceback.print_exc()
 
     # from flexpart module
     # convert -scale 70% -coalesce -layers Optimize -delay 20 -loop 0 `ls r11*.png | sort -r` r11.gif

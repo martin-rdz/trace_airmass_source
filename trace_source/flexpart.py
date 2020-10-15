@@ -549,11 +549,20 @@ def redistribute_rgb(r, g, b):
     gray = threshold - x * m
     return int(gray + x * r), int(gray + x * g), int(gray + x * b)
 
+def adjust_lightness(color, amount=0.5):
+    import matplotlib.colors as mc
+    import colorsys
+    try:
+        c = mc.cnames[color]
+    except:
+        c = color
+    c = colorsys.rgb_to_hls(*mc.to_rgb(c))
+    return colorsys.hls_to_rgb(c[0], max(0, min(1, amount * c[1])), c[2])
 
 
 
-
-def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, config=None, add_dyn=True):
+def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, 
+        config=None, add_dyn=True, add_fire=None):
     """"""
     
     release_sel = np.array([list(p) for p in part_pos if p[0]==release_no])
@@ -596,15 +605,11 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, config=
     # better green for the light map
     colors = ['lightskyblue', 'seagreen', 'khaki', '#6edd6e', 'darkmagenta', 'white', 'tan']
     #colors = ['lightskyblue', 'seagreen', 'khaki', '#a4dd6e', 'red', 'white', 'tan']
+    colors = ['lightskyblue', '#22a361', 'khaki', '#72d472', 'darkmagenta', 'white', 'tan']
     cmap = matplotlib.colors.ListedColormap(colors)
-    
-    cs = []
-    for ind in range(cmap.N):
-        c = []
-        for x in cmap(ind)[:3]: 
-            c.append(x*1.1*255.)
-        cs.append([sc/255. for sc in redistribute_rgb(*c)])
-    print(cs)
+
+    cs = [adjust_lightness(c, amount=1.15) for c in colors]
+    print('cs ', cs)
     cmap = matplotlib.colors.ListedColormap(cs)
     
     bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]
@@ -615,27 +620,39 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, config=
     #ax.coastlines(resolution='110m')
     ax.coastlines(resolution='50m')
     # ax.coastlines(resolution='10m')
+
+    labels = ['Water', 'Forest', 'Savanna/shrubland', 'Grass/cropland', 'Urban', 'Snow/ice', 'Barren']
+    handles = []
+    for c, l in zip(cs, labels):
+        if 'ice' in l:
+            handles.append(matplotlib.patches.Patch(
+                facecolor=c, label=l, edgecolor='grey', linewidth=2))
+        else:
+            handles.append(matplotlib.patches.Patch(color=c, label=l))
     
     # # # The modis fire map
-    # from cartopy.io.shapereader import Reader
-    # from cartopy.feature import ShapelyFeature
-    # # fname = '../data/DL_FIRE_M6_78471/fire_nrt_M6_78471.shp'
-    # fname = config_dir['partposit_dir'] + '20191130_DL_FIRE_V1_90092/fire_nrt_V1_90092.shp'
+    if add_fire:
+        from cartopy.io.shapereader import Reader
+        from cartopy.feature import ShapelyFeature
+        # # fname = '../data/DL_FIRE_M6_78471/fire_nrt_M6_78471.shp'
+        #    fname = config_dir['partposit_dir'] + '20191130_DL_FIRE_V1_90092/fire_nrt_V1_90092.shp'
+        fname = f'data/fire_data/DL_FIRE_{add_fire}/fire_nrt_{add_fire}.shp'
 
-    # shp_data = Reader(fname)
-    # print(next(shp_data.records()))
-    # frp = np.array([p.attributes['FRP'] for p in shp_data.records()])
-    # print(frp.shape, np.mean(frp), np.percentile(frp, [10,25,50,75,90]))
 
-    # #points = [p for p in list(shp_data.records()) if p.attributes['FRP'] > 12]
-    # # for viirs pixel with their smaller size
-    # points = [p for p in list(shp_data.records()) if p.attributes['FRP'] > 4]
-    # #points = sorted(points, key=lambda x: x.attributes['FRP'])
+        shp_data = Reader(fname)
+        # print(next(shp_data.records()))
+        frp = np.array([p.attributes['FRP'] for p in shp_data.records()])
+        # print(frp.shape, np.mean(frp), np.percentile(frp, [10,25,50,75,90]))
 
-    # scat = ax.scatter([p.geometry.x for p in points],
-    #                   [p.geometry.y for p in points],
-    #                   transform=ccrs.Geodetic(), s=1, 
-    #                   c='red')
+        points = [p for p in list(shp_data.records()) if p.attributes['FRP'] > 12]
+        # # for viirs pixel with their smaller size
+        # points = [p for p in list(shp_data.records()) if p.attributes['FRP'] > 4]
+        # #points = sorted(points, key=lambda x: x.attributes['FRP'])
+
+        scat = ax.scatter([p.geometry.x for p in points],
+                         [p.geometry.y for p in points],
+                         transform=ccrs.Geodetic(), s=0.5, 
+                         c='crimson')
 
     # optionally add the dynamics from gfs grib
     if add_dyn:
@@ -644,6 +661,9 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, config=
         if dt.hour%6 == 0:
             gribfile = f"data/gfs_083.2/{dt.strftime('%Y%m%d%H')}"
             print(gribfile)
+            if not os.path.isfile(gribfile):
+                print('try forecast file')
+                gribfile = f"data/gfs_083.2/{dt.strftime('%Y%m%d%H')}_f"
 
             ds_isobaric = xr.load_dataset(
                 gribfile, 
@@ -660,9 +680,14 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, config=
 
 
         else:
-            print('shit')
             gribfile1 = f"data/gfs_083.2/{(dt - datetime.timedelta(hours=3)).strftime('%Y%m%d%H')}"
             gribfile2 = f"data/gfs_083.2/{(dt + datetime.timedelta(hours=3)).strftime('%Y%m%d%H')}"
+            if not os.path.isfile(gribfile1):
+                print('try forecast file')
+                gribfile1 = f"data/gfs_083.2/{(dt - datetime.timedelta(hours=3)).strftime('%Y%m%d%H')}_f"
+            if not os.path.isfile(gribfile2):
+                print('try forecast file')
+                gribfile2 = f"data/gfs_083.2/{(dt + datetime.timedelta(hours=3)).strftime('%Y%m%d%H')}_f"
             print(gribfile1, gribfile2)
 
             ds_isobaric = xr.load_dataset(
@@ -758,18 +783,23 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, config=
     #     ax.set_extent([-179, 179, -75, -10], crs=ccrs.PlateCarree())
     
     ax.annotate("MODIS land cover classification [Broxton and Zeng 2014, JAMC]",
-                #xy=(.2, 0.105), xycoords='figure fraction',
-                xy=(.2, 0.085), xycoords='figure fraction',
+                xy=(.15, 0.108), xycoords='figure fraction',
+                #xy=(.2, 0.085), xycoords='figure fraction',
                 horizontalalignment='left', verticalalignment='bottom',
                 fontsize=11)
-    # ax.annotate("MODIS Active Fire Product, FRP > 12 MW/pixel [DOI:10.5067/FIRMS/MODIS/MCD14DL.NRT.006]",
-    #             xy=(.2, 0.085), xycoords='figure fraction',
-    #             horizontalalignment='left', verticalalignment='bottom',
-    #             fontsize=11)
+    if 'M6' in add_fire:
+        ax.annotate("MODIS Active Fire Product, FRP > 12 MW/pixel [DOI:10.5067/FIRMS/MODIS/MCD14DL.NRT.006]",
+                    xy=(.15, 0.080), xycoords='figure fraction',
+                    horizontalalignment='left', verticalalignment='bottom',
+                    fontsize=11)
     #ax.annotate("VIIRS Active Fire Product, FRP > 4 MW/pixel [DOI:10.5067/FIRMS/VIIRS/VNP14IMGT.NRT.001]",
     #        xy=(.2, 0.065), xycoords='figure fraction',
     #        horizontalalignment='left', verticalalignment='bottom',
     #        fontsize=11)
+
+
+    fig.legend(handles, labels, ncol=4, fontsize=10,
+               bbox_to_anchor=(0.20,0.22), loc='upper left')
 
     ax.set_title('Flexpart particle positions {}UTC\nRelease: [{:.2f} {:.2f} {:.2f} {:.2f}] {:.0f}-{:.0f}m'.format(
         dt.strftime('%Y-%m-%d %H'),

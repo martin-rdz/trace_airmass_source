@@ -11,7 +11,8 @@ config_*
 !config_limassol.toml
 data/Track_*.dat
 data/gfs_083.2/*
-!data/gfs_083.2/.gitkeep
+data/fire_data/*
+!data/fire_data/.gitkeep
 server_logins.toml
 #
 flexpart_simulations/AVAILABLE

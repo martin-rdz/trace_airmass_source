@@ -35,6 +35,11 @@ def refresh_AVAILABLE(data_dir):
                 date = file[0:8]+ ' '
                 time = file[8:10] + '0000      '
                 f.write(date + time + file + '      ' + 'ON_DISC' + '\n')
+            # or the forecast data
+            if file[:8].isdigit() and file[-2:] == '_f':
+                date = file[0:8]+ ' '
+                time = file[8:10] + '0000      '
+                f.write(date + time + file + '    ' + 'ON_DISC' + '\n')
     print("updated AVAILABLE")
 
 
