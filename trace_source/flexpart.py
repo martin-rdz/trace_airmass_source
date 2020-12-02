@@ -37,7 +37,7 @@ def read_flexpart_traj_meta(fname, ncluster = 5):
         data['ncluster'] = ncluster
         data['releases_meta'] = {} 
         data['releases_traj'] = defaultdict(lambda: defaultdict(list))
-        for i in range(data['no_releases']):
+        for i in range(1, data['no_releases']+1):
             l = f.readline().split()
             data['releases_meta'][i] = {}
             data['releases_meta'][i]['start_times'] = list(map(float, l[0:2]))
@@ -451,8 +451,9 @@ class assemble_time_height(trace_source.assemble_pattern):
                     #release_sel = np.array([list(p) for p in part_pos if p[0]==ih+1])
                     release_sel = part_pos[this_population, :]
                     #assert np.all(release_sel == other_release)
-                    meta = traj_meta['releases_meta'][ih]
+                    meta = traj_meta['releases_meta'][ih+1]
                     #print(meta)
+                    assert np.mean(meta['heights']) == h, f"{meta['heights']} {h} do not fit"
                     flex_stat[ih].add_partposits_gn(release_sel)
 
                     flex_stat[ih].add_partposits_ls(release_sel)
@@ -567,7 +568,7 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
     """"""
     
     release_sel = np.array([list(p) for p in part_pos if p[0]==release_no])
-    meta = traj['releases_meta'][release_no-1]
+    meta = traj['releases_meta'][release_no]
       
     import matplotlib
     matplotlib.use('Agg')

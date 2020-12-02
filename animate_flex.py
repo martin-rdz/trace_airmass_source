@@ -72,7 +72,7 @@ for f in files[:]:
         part_pos = trace_source.flexpart.read_partpositions(folder + f, 1, ctable=False)
 
         traj = trace_source.flexpart.read_flexpart_traj_meta(folder + "trajectories.txt")
-        level_to_heights[i] = np.mean(traj['releases_meta'][i-1]['heights'])
+        level_to_heights[i] = np.mean(traj['releases_meta'][i]['heights'])
         trace_source.flexpart.plot_part_loc_map(part_pos, i, dt, traj, savepath, ls=ls, 
                                                 config=config, 
                                                 add_dyn=add_dyn,
