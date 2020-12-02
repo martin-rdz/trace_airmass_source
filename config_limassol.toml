@@ -19,13 +19,22 @@ geonames = 'standard'
     # duration of each trajectory
     tr_duration = -240
 
+[flexpart]
+    no_particles = 500
+
 [plotmap]
+    maptype = 'miller'
     timeinterval = 6
     heights = [1500.0, 3000.0, 4500.0, 6000.0]
     #heights = [1500.0, 3000.0, 4500.0, 6000.0, 8000.0, 10000.0, 11000.0]
     #heights = [8000.0, 10000.0, 11000.0]
     bounds = [-120, 80, 0, 85]
     centerlon = -10
+    # heights = [8000.0, 10000.0, 11000.0]
+    #bounds = [-179.9, 180.0, -75.0, 0.0]
+    #bounds = [-120, 80, 0, 85]
+    # detailed map for paper
+    #bounds = [-100, -50, -65, -20]
 
 [height]
     top = 12000

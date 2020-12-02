@@ -94,5 +94,6 @@ RUN pip3 install --upgrade Sphinx
 RUN pip3 install sphinx_rtd_theme
 RUN pip3 install recommonmark
 RUN pip3 install bcolz
+RUN pip3 install pyhdf
 
 EXPOSE 8890

@@ -6,6 +6,8 @@
  IETIME=${end_time}, ! End  time of the simulation    ; same format as IBTIME
  LOUTSTEP=10800, ! Interval of model output; average concentrations calculated every LOUTSTEP (s)  
  LOUTAVER=10800, ! Interval of output averaging (s)
+! LOUTSTEP=3600, ! Interval of model output; average concentrations calculated every LOUTSTEP (s)  
+! LOUTAVER=3600, ! Interval of output averaging (s)
  LOUTSAMPLE=900, ! Interval of output sampling  (s), higher stat. accuracy with shorter intervals
  ITSPLIT=999999999, ! Interval of particle splitting (s) 
  LSYNCTIME=900, ! All processes are synchronized to this time interval (s)
@@ -13,6 +15,7 @@
  IFINE=4, ! Reduction for time step in vertical transport, used only if CTL>1 
  IOUT=4, ! Output type: [1]mass 2]pptv 3]1&2 4]plume 5]1&4, +8 for NetCDF output
  IPOUT=1, ! Particle position output: 0]no 1]every output 2]only at end 3]time averaged
+! IPOUT=0, ! Particle position output: 0]no 1]every output 2]only at end 3]time averaged
  IPOUTFAC=1,
  LSUBGRID=1, ! Increase of ABL heights due to sub-grid scale orographic variations;[0]off 1]on 
  LCONVECTION=1, ! Switch for convection parameterization;0]off [1]on    

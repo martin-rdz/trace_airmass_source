@@ -29,6 +29,15 @@
     4 = 'persia'
     5 = 'north_america'
     
+[eur_na]
+    filename = 'data/geo_names_eur_NA.kml'
+[eur_na.geo_names]
+    0 = 'cont_europe'
+    1 = 'sahara'
+    2 = 'arabian_peninsula'
+    3 = 'far_east_deserts'
+    4 = 'persia'
+    5 = 'north_america'
 
 [fire]
     filename = 'data/geo_names_fire.kml'
