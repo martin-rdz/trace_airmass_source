@@ -335,6 +335,9 @@ class assemble_time_height(trace_source.assemble_pattern):
                     self.statlat_dict[k][it, ih] = list(traj.stat_lat[k].counter.values())
                     print(self.statlat_dict[k][it, ih])
 
+            self.no_part.append(traj.info['no_traj'])
+            self.time_res.append(traj.data[1]['age'][1] - traj.data[1]['age'][2])
+
         # trying to free memory
         del ls
         del ng

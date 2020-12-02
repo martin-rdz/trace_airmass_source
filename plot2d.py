@@ -31,7 +31,7 @@ def gen_file_list(start, end, path, station, model):
     return l
 
 
-def plot_source_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, model):
+def plot_source_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, model, norm=None):
     time_list = f.variables["timestamp"][:]
     dt_list = [datetime.datetime.fromtimestamp(time) for time in time_list]
     height_list = f.variables["range"][:]
@@ -49,6 +49,9 @@ def plot_source_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, mo
         occ_height = np.ma.masked_less(occ_height, 0)
         if dsp == 'abs':
             occ_height = occ_height*no_occ[:, np.newaxis]
+        elif dsp == 'norm':
+            assert norm is not None
+            occ_height = occ_height*no_occ[:, np.newaxis]/norm
         occ_left = np.cumsum(occ_height, axis=1)
 
         categories = ast.literal_eval(f.variables[parameter].comment)
@@ -103,6 +106,10 @@ def plot_source_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, mo
             xright = 1.
             axes[it].set_xlim(right=xright)
             dsp_text = 'rel. residence time'
+        elif dsp == 'norm':
+            axes[it].set_xlim(right=1)
+            axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+            dsp_text = 'norm. residence time'
         #axes[it].xaxis.set_minor_locator(matplotlib.ticker.FixedLocator([0, xright]))
         axes[it].tick_params(axis='x', labeltop='off', labelbottom='off')
 
@@ -149,7 +156,7 @@ def plot_source_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, mo
     plt.close()
 
 
-def plot_geonames_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, model):
+def plot_geonames_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, model, norm=None):
     with open('geonames_config.toml') as config_file:
         geo_config = toml.loads(config_file.read())
 
@@ -184,6 +191,9 @@ def plot_geonames_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, 
         occ_height = np.ma.masked_less(occ_height, 0)
         if dsp == 'abs':
             occ_height = occ_height*no_occ[:, np.newaxis]
+        elif dsp == 'norm':
+            assert norm is not None
+            occ_height = occ_height*no_occ[:, np.newaxis]/norm
         occ_left = np.cumsum(occ_height, axis=1)
 
         l = []
@@ -224,6 +234,10 @@ def plot_geonames_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, 
             xright = 1.
             axes[it].set_xlim(right=xright)
             dsp_text = 'rel. residence time'
+        elif dsp == 'norm':
+            axes[it].set_xlim(right=1)
+            axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+            dsp_text = 'norm. residence time'
         #axes[it].xaxis.set_minor_locator(matplotlib.ticker.FixedLocator([0, xright]))
         axes[it].tick_params(axis='x', labeltop='off', labelbottom='off')
 
@@ -274,7 +288,7 @@ def plot_geonames_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, 
 
 
 
-def plot_lat_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, model):
+def plot_lat_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, model, norm=None):
 
 
     #geo_names = {int(k): v for k, v in geo_config[config['geonames']]['geo_names'].items()}
@@ -302,6 +316,9 @@ def plot_lat_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, model
         occ_height = np.ma.masked_less(occ_height, 0)
         if dsp == 'abs':
             occ_height = occ_height*no_occ[:, np.newaxis]
+        elif dsp == 'norm':
+            assert norm is not None
+            occ_height = occ_height*no_occ[:, np.newaxis]/norm
         occ_left = np.cumsum(occ_height, axis=1)
 
         l = []
@@ -342,6 +359,10 @@ def plot_lat_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, model
             xright = 1.
             axes[it].set_xlim(right=xright)
             dsp_text = 'rel. residence time'
+        elif dsp == 'norm':
+            axes[it].set_xlim(right=1)
+            axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+            dsp_text = 'norm. residence time'
         #axes[it].xaxis.set_minor_locator(matplotlib.ticker.FixedLocator([0, xright]))
         axes[it].tick_params(axis='x', labeltop='off', labelbottom='off')
 
@@ -390,9 +411,9 @@ def plot_lat_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, model
     fig.savefig(savename)
     plt.close()
 
-def plot_source_height_profile(f, parameter, dt, it, config, savepath, config_dict, model):
+def plot_source_height_profile(f, parameter, dt, it, dsp, config, savepath, config_dict, model, norm=None):
 
-    dsp = 'abs'
+    #dsp = 'abs'
 
     time_list = f.variables["timestamp"][:]
     dt_list = [datetime.datetime.fromtimestamp(time) for time in time_list]
@@ -407,6 +428,9 @@ def plot_source_height_profile(f, parameter, dt, it, config, savepath, config_di
 
     if dsp == 'abs':
         occ_height = occ_height*no_occ[:, np.newaxis]
+    elif dsp == 'norm':
+        assert norm is not None
+        occ_height = occ_height*no_occ[:, np.newaxis]/norm
 
     occ_left = np.cumsum(occ_height, axis=1)
     #print(occ_left)
@@ -435,6 +459,7 @@ def plot_source_height_profile(f, parameter, dt, it, config, savepath, config_di
     ax.set_ylim([0, config['height']['plottop']/1000.])
     #ax.set_ylim([0, 10.25])
 
+    dsp_text = 'Acc. residence time [h]'
     if dsp == 'abs':
         if "2.0km" in parameter:
             xright = 5000
@@ -449,8 +474,12 @@ def plot_source_height_profile(f, parameter, dt, it, config, savepath, config_di
         else:
             ax.xaxis.set_major_locator(matplotlib.ticker.AutoLocator())
         ax.xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
-    else:
+    elif dsp == 'rel':
         ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
+    elif dsp == 'norm':
+        ax.set_xlim(right=1)
+        ax.xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+        dsp_text = 'Norm. residence time'
 
     if dsp == 'abs':
         no_xloc = xright*1.13
@@ -466,7 +495,7 @@ def plot_source_height_profile(f, parameter, dt, it, config, savepath, config_di
 
     ax.set_title("{} {}".format(dt.strftime("%Y%m%d_%H"), parameter), 
                  fontweight='semibold', fontsize=15)
-    ax.set_xlabel("Acc. residence time", fontweight='semibold', fontsize=14)
+    ax.set_xlabel(dsp_text, fontweight='semibold', fontsize=14)
     ax.set_ylabel("Height [km]", fontweight='semibold', fontsize=14)
 
     ax.tick_params(axis='both', which='major', labelsize=14, 
@@ -681,25 +710,33 @@ def plot_filename(filename, config_dict, model, config_file='config.toml'):
         fig.savefig(savename, dpi=250)
         plt.close()
 
-
+    if model == 'flex':
+        norm = 40000
+    elif model == 'hysplit':
+        norm = 6480
     for rh in config['height']['reception']:
-            if rh != 'md':
-                rh_string = rh + 'km'
-            else:
-                rh_string = rh
-            plot_source_2d(f, 'occ_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
-            #plot_source_2d(f, 'occ_ens_below'+rh_string, dt_list, 'rel', config, savepath, config_dict, model)
-            plot_geonames_2d(f, 'region_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
-            #plot_geonames_2d(f, 'region_ens_below'+rh_string, dt_list, 'rel', config, savepath, config_dict, model)
+        if rh != 'md':
+            rh_string = rh + 'km'
+        else:
+            rh_string = rh
+        plot_source_2d(f, 'occ_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
+        #plot_source_2d(f, 'occ_ens_below'+rh_string, dt_list, 'rel', config, savepath, config_dict, model)
+        plot_geonames_2d(f, 'region_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
+        #plot_geonames_2d(f, 'region_ens_below'+rh_string, dt_list, 'rel', config, savepath, config_dict, model)
 
-            plot_lat_2d(f, 'lat_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
+        #plot_lat_2d(f, 'lat_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
+        plot_geonames_2d(f, 'region_ens_below'+rh_string, dt_list, 'norm', config, savepath, config_dict, model, norm=norm)
+        plot_source_2d(f, 'occ_ens_below'+rh_string, dt_list, 'norm', config, savepath, config_dict, model, norm=norm)
 
     for dt in dt_list:
         it = dt_list.index(dt)
         #plot_source_height_profile(f, 'occ_belowmd', dt, it, config, savepath, config_dict)
-        plot_source_height_profile(f, 'occ_ens_belowmd', dt, it, config, savepath, config_dict, model)
+        plot_source_height_profile(f, 'occ_ens_belowmd', dt, it, 'abs', config, savepath, config_dict, model)
         #plot_source_height_profile(f, 'occ_below2.0km', dt, it, config, savepath, config_dict)
-        plot_source_height_profile(f, 'occ_ens_below2.0km', dt, it, config, savepath, config_dict, model)
+        plot_source_height_profile(f, 'occ_ens_below2.0km', dt, it, 'abs', config, savepath, config_dict, model)
+        
+        plot_source_height_profile(f, 'occ_ens_belowmd', dt, it, 'norm', config, savepath, config_dict, model, norm=norm)
+        plot_source_height_profile(f, 'occ_ens_below2.0km', dt, it, 'norm', config, savepath, config_dict, model, norm=norm)
 
     gc.collect()
 

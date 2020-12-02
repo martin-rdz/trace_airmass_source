@@ -435,6 +435,9 @@ class assemble_time_height(trace_source.assemble_pattern):
             flex_stat = [flex_statistics(self.config, ls=ls, ng=ng) for h in self.height_list]
             traj_meta = read_flexpart_traj_meta(folder + "trajectories.txt")
 
+            self.no_part.append(traj_meta['releases_meta'][1]['no_particles'])
+            self.time_res.append(10*24/len(files_for_time))
+
             # different structure than hysplit
             # 1. loop through the ending times of the current day
             # 2. load partposit for a specified time
@@ -733,7 +736,7 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
 
     scat = ax.scatter(release_sel[:,1], release_sel[:,2], s=2,
                       c=release_sel[:,3]/1000., cmap='plasma',
-                      vmin=0.1, vmax=7.0, zorder=5,
+                      vmin=0.1, vmax=6.0, zorder=5,
                       transform=ccrs.Geodetic())
     
     cbar = fig.colorbar(scat, fraction=0.025, pad=0.01)

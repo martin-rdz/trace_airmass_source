@@ -12,6 +12,7 @@ import numpy as np
 import netCDF4
 import os
 import gc
+import subprocess
 
 
 
@@ -83,6 +84,14 @@ def save_item(dataset, item_data):
 
     return dataset
 
+def get_git_hash():
+    """
+    Returns:
+        git describe string
+    """
+    commit_id = subprocess.check_output(['git', 'describe', '--always'])
+    branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
+    return commit_id.rstrip(), branch.rstrip()
 
 
 class assemble_pattern():
@@ -110,6 +119,8 @@ class assemble_pattern():
         print('dt_list', self.dt_list)
         self.height_list = list(range(500, self.config['height']['top']+1, 500))
 
+        self.no_part = []
+        self.time_res = []
 
     # the assemble method is model data specific
     #def assemble(self, dt_range=None):
@@ -167,6 +178,15 @@ class assemble_pattern():
                             'arr': self.raw_dict['age'][0, 0],
                             'long_name': "Age of trajectory",
                             'units': "h"})
+
+        save_item(dataset, {'var_name': 'no_part', 'dimension': ('time', ),
+                            'arr': np.array(self.no_part),
+                            'long_name': "number particles/trajectories",
+                            'units': "no"})
+        save_item(dataset, {'var_name': 'time_res', 'dimension': ('time', ),
+                            'arr': np.array(self.time_res),
+                            'long_name': "backward time resolution",
+                            'units': "no"})
 
         for k in list(self.stat2d_dict.keys()):
             print(k, self.stat2d_dict.get(k).shape)
@@ -259,6 +279,7 @@ class assemble_pattern():
         dataset.day = self.dt_list[0].day
         dataset.month = self.dt_list[0].month
         dataset.year = self.dt_list[0].year
+        dataset.git_commit, dataset.git_branch = get_git_hash()
         dataset.close()
         gc.collect()
 
