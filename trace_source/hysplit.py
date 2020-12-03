@@ -256,7 +256,7 @@ class assemble_time_height(trace_source.assemble_pattern):
                                                          no_geo_names)))
 
                                                         
-        self.lat_names = {0: '', 1: ''}
+        self.lat_names = {0: '<-60', 1: '-60..-30', 2:'-30..0', 3: '0..30', 4: '30..60', 5: '>60'}
         self.statlat_dict = defaultdict(lambda: np.zeros((len(self.dt_list),
                                                          len(self.height_list),
                                                          len(list(self.lat_names.keys())))))
@@ -272,6 +272,8 @@ class assemble_time_height(trace_source.assemble_pattern):
             # sort by height
             f_list = sorted(filtered_files[dt], key= lambda x: x[1])
             print('file_list ', f_list)
+            print('length of file and height list ', len(f_list), len(self.height_list))
+            f_list = f_list[:len(self.height_list)]
             #assert len(f_list) > 1
             for ih, f in enumerate(f_list):
                 print(it, ih, f[1], dt)
@@ -624,7 +626,14 @@ class trajectory():
         for rh in self.config['height']['reception']:
             categories = np.empty((0,))
             for k, v in self.data.items():
-                category = v['latitude'] < -60
+
+                category = np.empty(v['latitude'].shape[0])
+                category[v['latitude'] < -60] = 0
+                category[(-60 < v['latitude']) & (v['latitude'] < -30)] = 1
+                category[(-30 < v['latitude']) & (v['latitude'] < 0)] = 2
+                category[(0 < v['latitude']) & (v['latitude'] < 30)] = 3
+                category[(30 < v['latitude']) & (v['latitude'] < 60)] = 4
+                category[60 < v['latitude']] = 5
                 category = category.astype(int)
  
                 if rh == 'md':
@@ -634,7 +643,7 @@ class trajectory():
                 categories = np.append(categories, cat)
 
             no = float(categories.shape[0]) if categories.shape[0] > 0 else -1
-            c = {x: categories.tolist().count(x)/float(no) for x in [0, 1]}
+            c = {x: categories.tolist().count(x)/float(no) for x in range(6)}
             if rh != 'md':
                 rh_string = rh + 'km'
             else:

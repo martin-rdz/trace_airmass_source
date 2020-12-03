@@ -329,14 +329,22 @@ class flex_statistics():
             else:
                 coords = array[array[:,3] < float(rh)*1000]
             # print('loop trough reception heights ', rh, coords.shape)
+            
+            category = np.empty(coords.shape[0])
+            category[coords[:,2] < -60] = 0
+            category[(-60 < coords[:,2]) & (coords[:,2] < -30)] = 1
+            category[(-30 < coords[:,2]) & (coords[:,2] < 0)] = 2
+            category[(0 < coords[:,2]) & (coords[:,2] < 30)] = 3
+            category[(30 < coords[:,2]) & (coords[:,2] < 60)] = 4
+            category[60 < coords[:,2]] = 5
 
-            category = coords[:,2] < -60
             category = category.astype(int)
 
             self.thres_categories[rh] = np.append(self.thres_categories[rh], category)
 
     def calc_thres_stat(self):
         """
+        self.lat_names = {0: '<-60', 1: '-60..-30', 2:'-30..0', 3: '0..30', 4: '30..60', 5: '>60'}
         """
 
         occ_stat = namedtuple('occ_stat', 'no_below counter')
@@ -344,7 +352,7 @@ class flex_statistics():
         for rh in self.config['height']['reception']:
             cat_this_height = self.thres_categories[rh]
             no = float(cat_this_height.shape[0]) if cat_this_height.shape[0] > 0 else -1
-            c = {x: cat_this_height.tolist().count(x)/float(no) for x in [0, 1]}
+            c = {x: cat_this_height.tolist().count(x)/float(no) for x in range(6)}
 
             if rh != 'md':
                 rh_string = rh + 'km'
@@ -413,7 +421,7 @@ class assemble_time_height(trace_source.assemble_pattern):
                                                          no_geo_names)))
 
 
-        self.lat_names = {0: '', 1: ''}
+        self.lat_names = {0: '<-60', 1: '-60..-30', 2:'-30..0', 3: '0..30', 4: '30..60', 5: '>60'}
         self.statlat_dict = defaultdict(lambda: np.zeros((len(self.dt_list),
                                                          len(self.height_list),
                                                          len(list(self.lat_names.keys())))))

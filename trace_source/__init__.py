@@ -214,7 +214,7 @@ class assemble_pattern():
         ls_data_keys = list(self.statls_dict.keys())
         print('ls_data_keys ', ls_data_keys)
         modified_params = {key: {'var_name': key,
-                                 'long_name': "land use " + key.lower(),
+                                 'long_name': "land surface " + key.lower(),
                                  'comment': str(self.ls_categories)} for key in ls_data_keys}
         for k in ls_data_keys:
             print(k, self.statls_dict.get(k).shape)
@@ -222,6 +222,26 @@ class assemble_pattern():
                                           'dimension': ('time', 'height', 'categories'),
                                           'arr': self.statls_dict.get(k),
                                           'long_name': modified_params[k]['long_name'],
+                                          'comment': modified_params[k]['comment']})
+
+        for k in [ky for ky in ls_data_keys if 'ens' in ky]:
+            rel = self.statls_dict.get(k)
+            no_below = self.stat2d_dict.get(k + "_no_below")
+            no_below = np.repeat(no_below[:,:,np.newaxis], rel.shape[-1], axis=2)
+            no_below[no_below < 0] = np.nan
+            norm = np.array(self.no_part)*10*(24./np.array(self.time_res))
+            norm = np.repeat(norm[:,np.newaxis], rel.shape[1], axis=1)
+            norm = np.repeat(norm[:,:,np.newaxis], rel.shape[2], axis=2)
+
+            normed_time = rel*no_below/norm
+            normed_time[~np.isfinite(normed_time)] = -1
+            str_below = modified_params[k]['var_name'].replace("occ_ens_", "")
+            var_name = "rt_normed_landsfc_" + str_below
+            long_name = "normed residence time land surface " + str_below
+            dataset = save_item(dataset, {'var_name': var_name,
+                                          'dimension': ('time', 'height', 'categories'),
+                                          'arr': normed_time,
+                                          'long_name': long_name,
                                           'comment': modified_params[k]['comment']})
 
 
@@ -238,6 +258,27 @@ class assemble_pattern():
                                           'arr': self.statgn_dict.get(k),
                                           'long_name': modified_params[k]['long_name'],
                                           'comment': modified_params[k]['comment']})
+            
+        for k in gn_data_keys:
+            rel = self.statgn_dict.get(k)
+            no_below = self.stat2d_dict.get(k + "_no_below")
+            no_below = np.repeat(no_below[:,:,np.newaxis], rel.shape[-1], axis=2)
+            no_below[no_below < 0] = np.nan
+            norm = np.array(self.no_part)*10*(24./np.array(self.time_res))
+            norm = np.repeat(norm[:,np.newaxis], rel.shape[1], axis=1)
+            norm = np.repeat(norm[:,:,np.newaxis], rel.shape[2], axis=2)
+
+            normed_time = rel*no_below/norm
+            normed_time[~np.isfinite(normed_time)] = -1
+            str_below = modified_params[k]['var_name'].replace("region_ens_", "")
+            var_name = "rt_normed_region_" + str_below
+            long_name = "normed residence time named region " + str_below
+            dataset = save_item(dataset, {'var_name': var_name,
+                                          'dimension': ('time', 'height', 'regions'),
+                                          'arr': normed_time,
+                                          'long_name': long_name,
+                                          'comment': modified_params[k]['comment']})
+
 
         # TODO make statlat optional statlat_dict
         lat_data_keys = list(self.statlat_dict.keys())
@@ -254,6 +295,26 @@ class assemble_pattern():
                                           'long_name': modified_params[k]['long_name'],
                                           'comment': modified_params[k]['comment']})
 
+        for k in lat_data_keys:
+            rel = self.statlat_dict.get(k)
+            no_below = self.stat2d_dict.get(k + "_no_below")
+            no_below = np.repeat(no_below[:,:,np.newaxis], rel.shape[-1], axis=2)
+            no_below[no_below < 0] = np.nan
+            norm = np.array(self.no_part)*10*(24./np.array(self.time_res))
+            norm = np.repeat(norm[:,np.newaxis], rel.shape[1], axis=1)
+            norm = np.repeat(norm[:,:,np.newaxis], rel.shape[2], axis=2)
+
+            normed_time = rel*no_below/norm
+            normed_time[~np.isfinite(normed_time)] = -1
+            str_below = modified_params[k]['var_name'].replace("lat_ens_", "")
+            var_name = "rt_normed_lat_" + str_below
+            long_name = "normed residence time latitude " + str_below
+            dataset = save_item(dataset, {'var_name': var_name,
+                                          'dimension': ('time', 'height', 'lat_thres'),
+                                          'arr': normed_time,
+                                          'long_name': long_name,
+                                          'comment': modified_params[k]['comment']})
+
 
         # save_item(dataset, {'var_name': 'width', 'dimension': ('time', 'height'),
         #                     'arr': .corr_width_reg[:].filled(), 'long_name': "Spectral width",
@@ -266,7 +327,7 @@ class assemble_pattern():
         with open('output_meta.toml') as output_meta:
             meta_info = toml.loads(output_meta.read())
 
-        dataset.description = "trace_source trajectory"
+        dataset.description = meta_info['description'][model_str]
         dataset.location = self.config['station']['name']
         if "moving" in self.config['station'].keys() and self.config['station']['moving'] == True:
             dataset.coordinates = "Moving Platform!"

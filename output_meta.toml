@@ -1,3 +1,8 @@
 institution = 'TROPOS'
 authors = 'Martin Radenz'
 contact = 'radenz@tropos.de'
+
+
+[description]
+  flex = 'Time-height airmass source product. See https://doi.org/10.5194/acp-2020-955 for further information. Based on FLEXPART 10 particle positions. Preferably use the rt_normed_... variables, the occ_ and region_ variables are only kept for backward compatability.'
+  hysplit = 'Time-height airmass source product. See https://doi.org/10.5194/acp-2020-955 for further information. Based on HYSPLIT (ensemble) trajectories. Preferably use the rt_normed_... variables, the occ_ and region_ variables are only kept for backward compatability.'
