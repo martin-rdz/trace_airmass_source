@@ -89,8 +89,12 @@ def get_git_hash():
     Returns:
         git describe string
     """
-    commit_id = subprocess.check_output(['git', 'describe', '--always'])
-    branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
+    try:
+        commit_id = subprocess.check_output(['git', 'describe', '--always'])
+        branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
+    except:
+        commit_id = ''
+        branch = 'not version controlled'
     return commit_id.rstrip(), branch.rstrip()
 
 

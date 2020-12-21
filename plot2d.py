@@ -477,7 +477,7 @@ def plot_source_height_profile(f, parameter, dt, it, dsp, config, savepath, conf
     elif dsp == 'rel':
         ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
     elif dsp == 'norm':
-        ax.set_xlim(right=1)
+        ax.set_xlim(right=0.8)
         ax.xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
         dsp_text = 'Norm. residence time'
 

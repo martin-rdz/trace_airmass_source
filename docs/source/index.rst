@@ -12,6 +12,7 @@ trace documentation
    :caption: Contents:
 
    Overview <README.md>
+   setup.rst
    api_overview.rst
 
 Indices and tables

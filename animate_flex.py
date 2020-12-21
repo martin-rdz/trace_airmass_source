@@ -76,7 +76,8 @@ for f in files[:]:
         trace_source.flexpart.plot_part_loc_map(part_pos, i, dt, traj, savepath, ls=ls, 
                                                 config=config, 
                                                 add_dyn=add_dyn,
-                                                add_fire='M6_7452')
+                                                )
+                                                #add_fire='M6_7452')
     gc.collect()
 
 
