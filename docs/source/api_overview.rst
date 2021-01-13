@@ -4,7 +4,12 @@
 api documentation
 #################
 
-hysplit module
+FLEXPART module
+---------------
+.. automodule:: trace_source.flexpart
+   :members:
+
+HYSPLIT module
 --------------
 .. automodule:: trace_source.hysplit
    :members:

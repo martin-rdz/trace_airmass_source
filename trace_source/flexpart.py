@@ -794,15 +794,22 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
     #     ax.set_extent([-179, 179, 45, 90], crs=ccrs.PlateCarree())
     # elif maptype == 'southernocean':
     #     ax.set_extent([-179, 179, -75, -10], crs=ccrs.PlateCarree())
+    if add_fire and 'M6' in add_fire:
+        str1_pos = (.15,0.080)
+        str2_pos = (.15,0.040)
+    else:
+        str1_pos = (.2,0.080)
     
     ax.annotate("MODIS land cover classification [Broxton and Zeng 2014, JAMC]",
-                xy=(.15, 0.108), xycoords='figure fraction',
+                #xy=(.15, 0.108), xycoords='figure fraction',
+                xy=str1_pos, xycoords='figure fraction',
                 #xy=(.2, 0.085), xycoords='figure fraction',
                 horizontalalignment='left', verticalalignment='bottom',
                 fontsize=11)
-    if 'M6' in add_fire:
+    if add_fire and 'M6' in add_fire:
         ax.annotate("MODIS Active Fire Product, FRP > 12 MW/pixel [DOI:10.5067/FIRMS/MODIS/MCD14DL.NRT.006]",
-                    xy=(.15, 0.080), xycoords='figure fraction',
+                    #xy=(.15, 0.040), xycoords='figure fraction',
+                    xy=str2_pos, xycoords='figure fraction',
                     horizontalalignment='left', verticalalignment='bottom',
                     fontsize=11)
     #ax.annotate("VIIRS Active Fire Product, FRP > 4 MW/pixel [DOI:10.5067/FIRMS/VIIRS/VNP14IMGT.NRT.001]",
@@ -812,7 +819,7 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
 
 
     fig.legend(handles, labels, ncol=4, fontsize=10,
-               bbox_to_anchor=(0.20,0.22), loc='upper left')
+               bbox_to_anchor=(0.20,0.185), loc='upper left')
 
     ax.set_title('Flexpart particle positions {}UTC\nRelease: [{:.2f} {:.2f} {:.2f} {:.2f}] {:.0f}-{:.0f}m'.format(
         dt.strftime('%Y-%m-%d %H'),

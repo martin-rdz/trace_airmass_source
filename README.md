@@ -44,7 +44,7 @@ When using docker under windows, the `pwd` has to be replaced by the path to the
 
 Please put your credentials (name, institution, contact) in the `output_meta.toml` file.
 
-If FLEXPART shall be used with GFS grib data, the login credential for the GFS data from `rda.ucar.edu` has to be stored in `server_logins.toml`.
+If FLEXPART shall be used with GFS grib data, the login credential for the [UCAR reserch data archive](rda.ucar.edu) has to be stored in `server_logins.toml`.
 
 
     [flexpart]
@@ -53,7 +53,7 @@ If FLEXPART shall be used with GFS grib data, the login credential for the GFS d
 
 
 Each station requires a config file. An example for Limassol is provided `config_limassol.toml`.
-A subfolder named after the respective station should exisit the folders `trajectories`, `flexpart_partposit` and `output`.
+A subfolder named after the respective station should exisit the folders `trajectories`, `flexpart_partposit`, `plots` and `output`.
     
 
 ### Usage
