@@ -62,7 +62,7 @@ def write_pathnames(control_dir, out_dir, data_dir, available_file):
 
 
 
-def write_COMMAND(control_dir, begin, end):
+def write_COMMAND(control_dir, begin, end, out_interval):
     
     with open('COMMAND_template') as t_file:
         temp = t_file.read()
@@ -71,8 +71,11 @@ def write_COMMAND(control_dir, begin, end):
     out_string = t.substitute(begin_date=begin.strftime("%Y%m%d"),
                               begin_time=begin.strftime("%H%M%S"),
                               end_date=end.strftime("%Y%m%d"),
-                              end_time=end.strftime("%H%M%S"))
+                              end_time=end.strftime("%H%M%S"),
+                              out_interval='{:.0f}'.format(out_interval))
     #print(pathnames)
+    print(out_string)
+    exit()
     with open(control_dir + 'COMMAND', 'w') as file:
         file.write(out_string)
     print("written COMMAND")
@@ -182,7 +185,10 @@ for dt in dt_list[:]:
                     data_dir,
                     "AVAILABLE")
 
-    write_COMMAND(os.getcwd()+'/', dt-datetime.timedelta(days=10), dt)
+    write_COMMAND(os.getcwd()+'/', 
+                  dt-datetime.timedelta(hours=abs(config['time']['tr_duration'])), 
+                  dt,
+                  config['time']['step']*60*60)
 
     time = [dt-datetime.timedelta(minutes=5), dt]
     bbox = {'lon_ll': config['station']['lon']-0.1, 'lat_ll': config['station']['lat']-0.1,

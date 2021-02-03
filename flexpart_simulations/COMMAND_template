@@ -4,8 +4,10 @@
  IBTIME=${begin_time}, ! Start time of the simulation   ; HHMISS: HH=hours, MI=min, SS=sec; UTC
  IEDATE=${end_date}, ! End date of the simulation     ; same format as IBDATE 
  IETIME=${end_time}, ! End  time of the simulation    ; same format as IBTIME
- LOUTSTEP=10800, ! Interval of model output; average concentrations calculated every LOUTSTEP (s)  
- LOUTAVER=10800, ! Interval of output averaging (s)
+ LOUTSTEP=${out_interval}, ! Interval of model output; average concentrations calculated every LOUTSTEP (s)  
+ LOUTAVER=${out_interval}, ! Interval of output averaging (s)
+! LOUTSTEP=10800, ! Interval of model output; average concentrations calculated every LOUTSTEP (s)  
+! LOUTAVER=10800, ! Interval of output averaging (s)
 ! LOUTSTEP=3600, ! Interval of model output; average concentrations calculated every LOUTSTEP (s)  
 ! LOUTAVER=3600, ! Interval of output averaging (s)
  LOUTSAMPLE=900, ! Interval of output sampling  (s), higher stat. accuracy with shorter intervals

@@ -730,13 +730,16 @@ def plot_filename(filename, config_dict, model, config_file='config.toml'):
 
     for dt in dt_list:
         it = dt_list.index(dt)
-        #plot_source_height_profile(f, 'occ_belowmd', dt, it, config, savepath, config_dict)
-        plot_source_height_profile(f, 'occ_ens_belowmd', dt, it, 'abs', config, savepath, config_dict, model)
-        #plot_source_height_profile(f, 'occ_below2.0km', dt, it, config, savepath, config_dict)
-        plot_source_height_profile(f, 'occ_ens_below2.0km', dt, it, 'abs', config, savepath, config_dict, model)
+        for rh in config['height']['reception']:
+            plot_source_height_profile(f, 'occ_ens_below'+rh_string, dt, it, 'abs', 
+                                       config, savepath, config_dict, model)
+            plot_source_height_profile(f, 'occ_ens_below'+rh_string, dt, it, 'abs', 
+                                       config, savepath, config_dict, model)
         
-        plot_source_height_profile(f, 'occ_ens_belowmd', dt, it, 'norm', config, savepath, config_dict, model, norm=norm)
-        plot_source_height_profile(f, 'occ_ens_below2.0km', dt, it, 'norm', config, savepath, config_dict, model, norm=norm)
+            plot_source_height_profile(f, 'occ_ens_below'+rh_string, dt, it, 'norm', 
+                                       config, savepath, config_dict, model, norm=norm)
+            plot_source_height_profile(f, 'occ_ens_below'+rh_string, dt, it, 'norm', 
+                                       config, savepath, config_dict, model, norm=norm)
 
     gc.collect()
 
