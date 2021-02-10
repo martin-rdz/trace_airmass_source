@@ -34,7 +34,7 @@ def gen_file_list(start, end, path, station, model):
     return l
 
 
-def plot_landsfc_2d(f, parameter, dt_list, config, savepath, config_dict, model):
+def plot_source_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, model, norm=None):
     time_list = f.variables["timestamp"][:]
     dt_list = [datetime.datetime.fromtimestamp(time) for time in time_list]
     height_list = f.variables["range"][:]
@@ -46,9 +46,15 @@ def plot_landsfc_2d(f, parameter, dt_list, config, savepath, config_dict, model)
     ls_colors = ['lightskyblue', 'seagreen', 'khaki', '#6edd6e', 'darkmagenta', 'gray', 'tan']
 
     for it, dt in enumerate(dt_list):
-
+        no_occ = f.variables[parameter + '_no_below'][it, :]
+        no_occ = np.ma.masked_less(no_occ, 0)
         occ_height = f.variables[parameter][it, :, :]
         occ_height = np.ma.masked_less(occ_height, 0)
+        if dsp == 'abs':
+            occ_height = occ_height*no_occ[:, np.newaxis]
+        elif dsp == 'norm':
+            assert norm is not None
+            occ_height = occ_height*no_occ[:, np.newaxis]/norm
         occ_left = np.cumsum(occ_height, axis=1)
 
         categories = ast.literal_eval(f.variables[parameter].comment)
@@ -83,16 +89,37 @@ def plot_landsfc_2d(f, parameter, dt_list, config, savepath, config_dict, model)
         axes[it].yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1.0))
         axes[it].set_xlabel(dt.strftime('%H:%M'), fontsize=13)
         
-        axes[it].set_xlim(right=1)
-        axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
-        dsp_text = 'norm. residence time'
+
+        if dsp == 'abs':
+            if "2.0km" in parameter:
+                xright = 5000
+            else:
+                xright = 7000
+
+            if model == 'flex':
+                xright = 4.5e4
+            axes[it].set_xlim(right=xright)
+            dsp_text = 'acc. residence time'
+            if model != 'flex':
+                axes[it].xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(3000))
+            else:
+                axes[it].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())
+            axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+        elif dsp == 'rel':
+            xright = 1.
+            axes[it].set_xlim(right=xright)
+            dsp_text = 'rel. residence time'
+        elif dsp == 'norm':
+            axes[it].set_xlim(right=1)
+            axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+            dsp_text = 'norm. residence time'
         #axes[it].xaxis.set_minor_locator(matplotlib.ticker.FixedLocator([0, xright]))
         axes[it].tick_params(axis='x', labeltop='off', labelbottom='off')
 
-    param_str = parameter.replace('rt_normed_', '') 
+
     axes[0].set_ylabel("Height [km]", fontweight='semibold', fontsize=14)
     axes[-1].tick_params(axis='x', labeltop='on', labelbottom='off', labelsize=11)
-    plt.suptitle("{}   {}   {}".format(dt.strftime("%Y%m%d"), config_dict['station']["name"], param_str), 
+    plt.suptitle("{}   {}   {}".format(dt.strftime("%Y%m%d"), config_dict['station']["name"], parameter), 
                  fontweight='semibold', fontsize=15)
     if 'moving' in config_dict['station'].keys() and config_dict['station']['moving']:
         pass
@@ -125,14 +152,14 @@ def plot_landsfc_2d(f, parameter, dt_list, config, savepath, config_dict, model)
     plt.tight_layout(rect=[0, 0.02, 1, 0.88])
     fig.subplots_adjust(wspace=0)
 
-    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_{}.png".format(short_name, param_str.replace('_', '-'))
+    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_multi-land-use-{}-{}.png".format(short_name, dsp, parameter.replace('_', '-'))
     fig.savefig(savename, dpi=400)
-    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_{}.svg".format(short_name, param_str.replace('_', '-'))
+    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_multi-land-use-{}-{}.svg".format(short_name, dsp, parameter.replace('_', '-'))
     fig.savefig(savename)
     plt.close()
 
 
-def plot_regions_2d(f, parameter, dt_list, config, savepath, config_dict, model):
+def plot_geonames_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, model, norm=None):
     with open('geonames_config.toml') as config_file:
         geo_config = toml.loads(config_file.read())
 
@@ -161,8 +188,15 @@ def plot_regions_2d(f, parameter, dt_list, config, savepath, config_dict, model)
     #fig, axes = plt.subplots(1, no_plots, sharex=True, sharey=True, figsize=(9, 6))
 
     for it, dt in enumerate(dt_list):
+        no_occ = f.variables[parameter + '_no_below'][it, :]
+        no_occ = np.ma.masked_less(no_occ, 0)
         occ_height = f.variables[parameter][it, :, :]
         occ_height = np.ma.masked_less(occ_height, 0)
+        if dsp == 'abs':
+            occ_height = occ_height*no_occ[:, np.newaxis]
+        elif dsp == 'norm':
+            assert norm is not None
+            occ_height = occ_height*no_occ[:, np.newaxis]/norm
         occ_left = np.cumsum(occ_height, axis=1)
 
         l = []
@@ -184,17 +218,36 @@ def plot_regions_2d(f, parameter, dt_list, config, savepath, config_dict, model)
         axes[it].yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1.0))
         axes[it].set_xlabel(dt.strftime('%H:%M'), fontsize=14)
         
-        axes[it].set_xlim(right=1)
-        axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
-        dsp_text = 'norm. residence time'
+
+        if dsp == 'abs':
+            if "2.0km" in parameter:
+                xright = 5000
+            else:
+                xright = 7000
+            if model == 'flex':
+                xright = 4.5e4
+            axes[it].set_xlim(right=xright)
+            dsp_text = 'acc. residence time'
+            if model != 'flex':
+                axes[it].xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(3000))
+            else:
+                axes[it].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())
+            axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+        elif dsp == 'rel':
+            xright = 1.
+            axes[it].set_xlim(right=xright)
+            dsp_text = 'rel. residence time'
+        elif dsp == 'norm':
+            axes[it].set_xlim(right=1)
+            axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+            dsp_text = 'norm. residence time'
         #axes[it].xaxis.set_minor_locator(matplotlib.ticker.FixedLocator([0, xright]))
         axes[it].tick_params(axis='x', labeltop='off', labelbottom='off')
 
 
-    param_str = parameter.replace('rt_normed_', '') 
     axes[0].set_ylabel("Height [km]", fontweight='semibold', fontsize=14)
     axes[-1].tick_params(axis='x', labeltop='on', labelbottom='off', labelsize=11)
-    plt.suptitle("{}   {}   {}".format(dt.strftime("%Y%m%d"), config_dict['station']["name"], param_str), 
+    plt.suptitle("{}   {}   {}".format(dt.strftime("%Y%m%d"), config_dict['station']["name"], parameter), 
                  fontweight='semibold', fontsize=15)
     if 'moving' in config_dict['station'].keys() and config_dict['station']['moving']:
         pass
@@ -230,37 +283,26 @@ def plot_regions_2d(f, parameter, dt_list, config, savepath, config_dict, model)
     plt.tight_layout(rect=[0, 0.02, 1, 0.88])
     fig.subplots_adjust(wspace=0)
 
-    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_{}.png".format(short_name, param_str.replace('_', '-'))
+    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_multi-geonames-{}-{}.png".format(short_name, dsp, parameter.replace('_', '-'))
     fig.savefig(savename, dpi=400)
-    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_{}.svg".format(short_name, param_str.replace('_', '-'))
+    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_multi-geonames-{}-{}.svg".format(short_name, dsp, parameter.replace('_', '-'))
     fig.savefig(savename)
     plt.close()
 
 
 
-def plot_lat_2d(f, parameter, dt_list, config, savepath, config_dict, model):
+def plot_lat_2d(f, parameter, dt_list, dsp, config, savepath, config_dict, model, norm=None):
 
 
     #geo_names = {int(k): v for k, v in geo_config[config['geonames']]['geo_names'].items()}
     #assert geo_names == ast.literal_eval(f.variables[parameter].comment), "geonames not matching {}".format(str(geo_names))
-    #lat_names = {0: 'N -60', 1: 'S -60'}
-
-    lat_names = ast.literal_eval(f.variables[parameter].comment)
+    lat_names = {0: 'N -60', 1: 'S -60'}
 
     NUM_COLORS = f.variables[parameter].shape[-1]
-    #cm = plt.get_cmap('Set2')
-    #cNorm  = matplotlib.colors.Normalize(vmin=0, vmax=NUM_COLORS-1)
-    #scalarMap = matplotlib.cm.ScalarMappable(norm=cNorm, cmap=cm)
-    #colors = [scalarMap.to_rgba(i) for i in range(NUM_COLORS)]
-    #colors = [matplotlib.cm.get_cmap('Accent')(i) for i in np.linspace(0,1,NUM_COLORS)]
-    colors = [
-            (0.2196078431372549, 0.4235294117647059, 0.6901960784313725, 1.0), #blue
-            (0.7450980392156863, 0.6823529411764706, 0.8313725490196079, 1.0), #violet
-            (0.9, 0.9, 0.2, 1.0),  # yellow
-            (0.7490196078431373, 0.3568627450980392, 0.09019607843137253, 1.0), #brown
-            (0.4980392156862745, 0.788235294117647, 0.4980392156862745, 1.0), #green
-            (0.5, 0.5, 0.5, 1.0) # grey
-            ]
+    cm = plt.get_cmap('Set2')
+    cNorm  = matplotlib.colors.Normalize(vmin=0, vmax=NUM_COLORS-1)
+    scalarMap = matplotlib.cm.ScalarMappable(norm=cNorm, cmap=cm)
+    colors = [scalarMap.to_rgba(i) for i in range(NUM_COLORS)]
 
     time_list = f.variables["timestamp"][:]
     dt_list = [datetime.datetime.fromtimestamp(time) for time in time_list]    
@@ -271,8 +313,15 @@ def plot_lat_2d(f, parameter, dt_list, config, savepath, config_dict, model):
     #fig, axes = plt.subplots(1, no_plots, sharex=True, sharey=True, figsize=(9, 6))
 
     for it, dt in enumerate(dt_list):
+        no_occ = f.variables[parameter + '_no_below'][it, :]
+        no_occ = np.ma.masked_less(no_occ, 0)
         occ_height = f.variables[parameter][it, :, :]
         occ_height = np.ma.masked_less(occ_height, 0)
+        if dsp == 'abs':
+            occ_height = occ_height*no_occ[:, np.newaxis]
+        elif dsp == 'norm':
+            assert norm is not None
+            occ_height = occ_height*no_occ[:, np.newaxis]/norm
         occ_left = np.cumsum(occ_height, axis=1)
 
         l = []
@@ -294,16 +343,36 @@ def plot_lat_2d(f, parameter, dt_list, config, savepath, config_dict, model):
         axes[it].yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1.0))
         axes[it].set_xlabel(dt.strftime('%H:%M'), fontsize=14)
         
-        axes[it].set_xlim(right=1.05)
-        axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
-        dsp_text = 'norm. residence time'
+
+        if dsp == 'abs':
+            if "2.0km" in parameter:
+                xright = 5000
+            else:
+                xright = 7000
+            if model == 'flex':
+                xright = 4.5e4
+            axes[it].set_xlim(right=xright)
+            dsp_text = 'acc. residence time'
+            if model != 'flex':
+                axes[it].xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(3000))
+            else:
+                axes[it].xaxis.set_major_locator(matplotlib.ticker.AutoLocator())
+            axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+        elif dsp == 'rel':
+            xright = 1.
+            axes[it].set_xlim(right=xright)
+            dsp_text = 'rel. residence time'
+        elif dsp == 'norm':
+            axes[it].set_xlim(right=1)
+            axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+            dsp_text = 'norm. residence time'
         #axes[it].xaxis.set_minor_locator(matplotlib.ticker.FixedLocator([0, xright]))
         axes[it].tick_params(axis='x', labeltop='off', labelbottom='off')
 
-    param_str = parameter.replace('rt_normed_', '') 
+
     axes[0].set_ylabel("Height [km]", fontweight='semibold', fontsize=14)
     axes[-1].tick_params(axis='x', labeltop='on', labelbottom='off', labelsize=11)
-    plt.suptitle("{}   {}   {}".format(dt.strftime("%Y%m%d"), config_dict['station']["name"], param_str), 
+    plt.suptitle("{}   {}   {}".format(dt.strftime("%Y%m%d"), config_dict['station']["name"], parameter), 
                  fontweight='semibold', fontsize=15)
     if 'moving' in config_dict['station'].keys() and config_dict['station']['moving']:
         pass
@@ -330,7 +399,7 @@ def plot_lat_2d(f, parameter, dt_list, config, savepath, config_dict, model):
                loc='upper left',
                #bbox_to_anchor=(0.01, 0.952),
                bbox_to_anchor=(0.01, 0.947),
-               ncol=6, fontsize=12, framealpha=0.8)
+               ncol=5, fontsize=12, framealpha=0.8)
     #fig.set_tight_layout({'rect': [0, 0, 1, 1], 'pad': 0.1, 'h_pad': 1.5})
     #plt.tight_layout(w_pad=0.0002)
 
@@ -339,10 +408,108 @@ def plot_lat_2d(f, parameter, dt_list, config, savepath, config_dict, model):
     plt.tight_layout(rect=[0, 0.02, 1, 0.88])
     fig.subplots_adjust(wspace=0)
 
-    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_{}.png".format(short_name, param_str.replace('_', '-'))
+    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_multi-lat-{}-{}.png".format(short_name, dsp, parameter.replace('_', '-'))
     fig.savefig(savename, dpi=400)
-    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_{}.svg".format(short_name, param_str.replace('_', '-'))
+    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_multi-lat-{}-{}.svg".format(short_name, dsp, parameter.replace('_', '-'))
     fig.savefig(savename)
+    plt.close()
+
+def plot_source_height_profile(f, parameter, dt, it, dsp, config, savepath, config_dict, model, norm=None):
+
+    #dsp = 'abs'
+
+    time_list = f.variables["timestamp"][:]
+    dt_list = [datetime.datetime.fromtimestamp(time) for time in time_list]
+    height_list = f.variables["range"][:]
+    no_occ = f.variables[parameter + '_no_below'][it, :]
+    no_occ = np.ma.masked_less(no_occ, 0)
+    #print(no_occ)
+
+    occ_height = f.variables[parameter][it, :, :]
+    occ_height = np.ma.masked_less(occ_height, 0)
+    #print(occ_height)
+
+    if dsp == 'abs':
+        occ_height = occ_height*no_occ[:, np.newaxis]
+    elif dsp == 'norm':
+        assert norm is not None
+        occ_height = occ_height*no_occ[:, np.newaxis]/norm
+
+    occ_left = np.cumsum(occ_height, axis=1)
+    #print(occ_left)
+
+    ls_colors = ['lightskyblue', 'darkgreen', 'khaki', 'palegreen', 'red', 'grey', 'tan']
+    ls_colors = ['lightskyblue', 'seagreen', 'khaki', '#6edd6e', 'darkmagenta', 'gray', 'tan']
+
+    fig, ax = plt.subplots(1, figsize=(5, 7.5))
+
+    ax.barh(height_list, occ_height[:, 0].T, 
+            align='center', height=0.3, color=ls_colors[0], edgecolor='none')
+    ax.barh(height_list, occ_height[:, 1].T, left=occ_left[:, 0].T,
+            align='center', height=0.3, color=ls_colors[1], edgecolor='none')
+    ax.barh(height_list, occ_height[:, 2].T, left=occ_left[:, 1].T,
+            align='center', height=0.3, color=ls_colors[2], edgecolor='none')
+    ax.barh(height_list, occ_height[:, 3].T, left=occ_left[:, 2].T,
+            align='center', height=0.3, color=ls_colors[3], edgecolor='none')
+    ax.barh(height_list, occ_height[:, 4].T, left=occ_left[:, 3].T,
+            align='center', height=0.3, color=ls_colors[4], edgecolor='none')
+    ax.barh(height_list, occ_height[:, 5].T, left=occ_left[:, 4].T,
+            align='center', height=0.3, color=ls_colors[5], edgecolor='none')
+
+    ax.barh(height_list, occ_height[:, 6].T, left=occ_left[:, 5].T,
+            align='center', height=0.3, color=ls_colors[6], edgecolor='none')
+
+    ax.set_ylim([0, config['height']['plottop']/1000.])
+    #ax.set_ylim([0, 10.25])
+
+    dsp_text = 'Acc. residence time [h]'
+    if dsp == 'abs':
+        if "2.0km" in parameter:
+            xright = 5000
+        else:
+            xright = 7000
+
+        if model == 'flex':
+            xright = 4.5e4
+        ax.set_xlim(right=xright)
+        if model != 'flex':
+            ax.xaxis.set_major_locator(matplotlib.ticker.MultipleLocator(3000))
+        else:
+            ax.xaxis.set_major_locator(matplotlib.ticker.AutoLocator())
+        ax.xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+    elif dsp == 'rel':
+        ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
+    elif dsp == 'norm':
+        ax.set_xlim(right=0.8)
+        ax.xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+        dsp_text = 'Norm. residence time'
+
+    if dsp == 'abs':
+        no_xloc = xright*1.13
+    else:
+        no_xloc = 1.17
+    for i, h in enumerate(height_list):
+        if h < 10:
+            ax.text(no_xloc, h-0.15, int(no_occ.filled(0)[i]),
+                    verticalalignment='bottom', horizontalalignment='right',
+                    fontsize=11, fontweight='semibold')
+
+    ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.5))
+
+    ax.set_title("{} {}".format(dt.strftime("%Y%m%d_%H"), parameter), 
+                 fontweight='semibold', fontsize=15)
+    ax.set_xlabel(dsp_text, fontweight='semibold', fontsize=14)
+    ax.set_ylabel("Height [km]", fontweight='semibold', fontsize=14)
+
+    ax.tick_params(axis='both', which='major', labelsize=14, 
+                   width=2, length=4)
+    ax.tick_params(axis='both', which='minor', width=1.5, length=3)
+    ax.tick_params(axis='both', which='both', right=True, top=True,
+                   direction='in')
+
+    plt.tight_layout(rect=[0,0,0.92,1])
+    savename = savepath + "/" + dt.strftime("%Y%m%d_%H") + "_{}_land-use-{}-{}.png".format(short_name, dsp, parameter.replace('_', '-'))
+    fig.savefig(savename, dpi=250)
     plt.close()
 
 
@@ -546,18 +713,32 @@ def plot_filename(filename, config_dict, model, config_file='config.toml'):
         fig.savefig(savename, dpi=250)
         plt.close()
 
-
+    if model == 'flex':
+        norm = 40000
+    elif model == 'hysplit':
+        norm = 6480
     for rh in config['height']['reception']:
         if rh != 'md':
             rh_string = rh + 'km'
         else:
             rh_string = rh
-        
-        if 'rt_normed_region_below'+rh_string in f.variables:
-            plot_lat_2d(f, 'rt_normed_lat_below'+rh_string, dt_list, config, savepath, config_dict, model)
-        plot_regions_2d(f, 'rt_normed_region_below'+rh_string, dt_list, config, savepath, config_dict, model)
-        plot_landsfc_2d(f, 'rt_normed_landsfc_below'+rh_string, dt_list, config, savepath, config_dict, model)
+        plot_source_2d(f, 'occ_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
+        #plot_source_2d(f, 'occ_ens_below'+rh_string, dt_list, 'rel', config, savepath, config_dict, model)
+        plot_geonames_2d(f, 'region_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
+        #plot_geonames_2d(f, 'region_ens_below'+rh_string, dt_list, 'rel', config, savepath, config_dict, model)
 
+        #plot_lat_2d(f, 'lat_ens_below'+rh_string, dt_list, 'abs', config, savepath, config_dict, model)
+        plot_geonames_2d(f, 'region_ens_below'+rh_string, dt_list, 'norm', config, savepath, config_dict, model, norm=norm)
+        plot_source_2d(f, 'occ_ens_below'+rh_string, dt_list, 'norm', config, savepath, config_dict, model, norm=norm)
+
+    for dt in dt_list:
+        it = dt_list.index(dt)
+        for rh in config['height']['reception']:
+            plot_source_height_profile(f, 'occ_ens_below'+rh_string, dt, it, 'abs', 
+                                       config, savepath, config_dict, model)
+        
+            plot_source_height_profile(f, 'occ_ens_below'+rh_string, dt, it, 'norm', 
+                                       config, savepath, config_dict, model, norm=norm)
 
     gc.collect()
 
@@ -590,4 +771,4 @@ for filename in filelist:
     print('plotting file ', filename)
     plot_filename(filename, config_dict, args.model, config_file=config)
 
-logger.warning('DeprecationWarning: New version of plot2d.py. For old version see plot2d_legacy.py')
+logger.warning('DeprecationWarning: This is the legacy version of plot2d.py')

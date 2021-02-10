@@ -74,8 +74,7 @@ def write_COMMAND(control_dir, begin, end, out_interval):
                               end_time=end.strftime("%H%M%S"),
                               out_interval='{:.0f}'.format(out_interval))
     #print(pathnames)
-    print(out_string)
-    exit()
+    #print(out_string)
     with open(control_dir + 'COMMAND', 'w') as file:
         file.write(out_string)
     print("written COMMAND")
@@ -153,6 +152,22 @@ config = toml.load('config_{}.toml'.format(args.station))
 
 comment = 'trace {} '.format(args.station)
 
+if "moving" in config['station'] and config['station']['moving'] == True:
+    import csv
+    print('moving platform')
+
+    track_data = {}
+    print(os.getcwd())
+    with open(config['station']["trackfile"]) as f:
+        reader = csv.reader(f, delimiter=' ')
+        for row in reader:
+            #dt = datetime.datetime.strptime(row[0]+" "+row[1], "%d.%m.%Y %H:%M:%S")
+            dt = datetime.datetime.strptime(row[0]+" "+row[1], "%Y.%m.%d %H:%M:%S")
+            #dt = datetime.datetime.strptime(row[0]+" "+row[1], "%Y-%m-%d %H:%M:%S")
+            coords = (float(row[2]), float(row[3]))
+            track_data[dt.strftime("%Y%m%d-%H%M")] = coords
+
+
 if args.fields == 'gfs1':
     data_dir = "../data/gfs_083.2/"
 elif args.fields == 'gfs0p25':
@@ -191,8 +206,13 @@ for dt in dt_list[:]:
                   config['time']['step']*60*60)
 
     time = [dt-datetime.timedelta(minutes=5), dt]
-    bbox = {'lon_ll': config['station']['lon']-0.1, 'lat_ll': config['station']['lat']-0.1,
-            'lon_ur': config['station']['lon']+0.1, 'lat_ur': config['station']['lat']+0.1}
+    if "moving" in config['station'] and config['station']['moving'] == True:
+        coords = track_data[dt.strftime("%Y%m%d-%H%M")]
+        bbox = {'lon_ll': coords[1]-0.1, 'lat_ll': coords[0]-0.1,
+                'lon_ur': coords[1]+0.1, 'lat_ur': coords[0]+0.1}
+    else:
+        bbox = {'lon_ll': config['station']['lon']-0.1, 'lat_ll': config['station']['lat']-0.1,
+                'lon_ur': config['station']['lon']+0.1, 'lat_ur': config['station']['lat']+0.1}
 
     center_heights = list(range(500, config['height']['top']+1, 500))
     heights = [(h-200, h+200) for h in center_heights]
