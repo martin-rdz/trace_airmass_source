@@ -21,6 +21,10 @@ geonames = 'standard'
 
 [flexpart]
     no_particles = 500
+    rel_before_minutes = 5
+    rel_after_minutes = 0
+    rel_pm_height = 200
+    species = 24
 
 [plotmap]
     maptype = 'miller'
@@ -38,6 +42,8 @@ geonames = 'standard'
 
 [height]
     top = 12000
+    base = 500
+    interval = 500
     plottop = 10250
     # 'md' mixing depth, '2.0' in km without
     reception = ['md', '2.0', '5.0']

@@ -12,7 +12,7 @@
   1      
 ___                        i3    Total number of species emitted
 
- 24
+${species}
 ___                        i3    Index of species in file SPECIES
 
 =========================================================================

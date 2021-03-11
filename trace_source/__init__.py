@@ -121,7 +121,9 @@ class assemble_pattern():
                                               self.config['time']['end_dt'],
                                               self.config['time']['step'])
         print('dt_list', self.dt_list)
-        self.height_list = list(range(500, self.config['height']['top']+1, 500))
+        self.height_list = list(range(self.config['height']['base'], 
+                                      self.config['height']['top']+1, 
+                                      self.config['height']['interval']))
 
         self.no_part = []
         self.time_res = []

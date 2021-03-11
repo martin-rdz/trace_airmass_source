@@ -81,14 +81,26 @@ def write_COMMAND(control_dir, begin, end, out_interval):
 
     
 
-def write_RELEASES(control_dir, time, bbox, heights, no_part, comment):
-    """
+def write_RELEASES(control_dir, time, bbox, heights, species, no_part, comment):
+    """write the RELEASES files
+
+    Args:
+      control_dir:
+      time:
+      bbox:
+      heights:
+      species:
+      no_part:
+      comment:
 
     """
 
     
     with open('RELEASES_header_template') as t_file:
-        out_string = t_file.read()
+        header_temp = t_file.read()
+
+    header_t = string.Template(header_temp)
+    out_string = header_t.substitute(species=species)
 
     with open('RELEASES_template') as t_file:
         temp = t_file.read()
@@ -205,7 +217,8 @@ for dt in dt_list[:]:
                   dt,
                   config['time']['step']*60*60)
 
-    time = [dt-datetime.timedelta(minutes=5), dt]
+    time = [dt-datetime.timedelta(minutes=config['flexpart']['rel_before_minutes']), 
+            dt+datetime.timedelta(minutes=config['flexpart']['rel_after_minutes'])]
     if "moving" in config['station'] and config['station']['moving'] == True:
         coords = track_data[dt.strftime("%Y%m%d-%H%M")]
         bbox = {'lon_ll': coords[1]-0.1, 'lat_ll': coords[0]-0.1,
@@ -214,8 +227,9 @@ for dt in dt_list[:]:
         bbox = {'lon_ll': config['station']['lon']-0.1, 'lat_ll': config['station']['lat']-0.1,
                 'lon_ur': config['station']['lon']+0.1, 'lat_ur': config['station']['lat']+0.1}
 
-    center_heights = list(range(500, config['height']['top']+1, 500))
-    heights = [(h-200, h+200) for h in center_heights]
+    center_heights = list(range(config['height']['base'], config['height']['top']+1, config['height']['interval']))
+    plusminus_height = config['flexpart']['rel_pm_height'] 
+    heights = [(h-plusminus_height, h+plusminus_height) for h in center_heights]
     #assert heights == [(300, 700), (800,1200), (1300, 1700), (1800,2200),
     #           (2300, 2700), (2800,3200), 
     #           (3300, 3700), (3800,4200), (4300, 4700), (4800,5200),
@@ -225,7 +239,9 @@ for dt in dt_list[:]:
     #           (11300, 11700), (11800,12200), 
     #           ]
     #heights = [(300,700)]
-    write_RELEASES(os.getcwd()+'/', time, bbox, heights, config['flexpart']['no_particles'], comment)
+    write_RELEASES(os.getcwd()+'/', time, bbox, heights, 
+                   config['flexpart']['species'], 
+                   config['flexpart']['no_particles'], comment)
 
     # if options.model == 'gfs1':
     #     flexpart_bin = ['/home/flexpart/flexpart/programs/flexpart/FLEXPART_GFS', '.']
