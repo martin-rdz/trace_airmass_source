@@ -336,6 +336,7 @@ class assemble_time_height(trace_source.assemble_pattern):
                     print('stat lat ', k, traj.stat_lat[k])
                     self.statlat_dict[k][it, ih] = list(traj.stat_lat[k].counter.values())
                     print(self.statlat_dict[k][it, ih])
+                #input()
 
             self.no_part.append(traj.info['no_traj'])
             self.time_res.append(traj.data[1]['age'][1] - traj.data[1]['age'][2])
@@ -555,12 +556,16 @@ class trajectory():
         for rh in self.config['height']['reception']:
             categories = np.empty((0,))
             for k, v in self.data.items():
-                category = ls.get_land_sfc(v['latitude'],
-                                           v['longitude'])
+
+                mask = np.logical_or(v['latitude'].mask, v['longitude'].mask)
+                if not np.all(mask):
+                    mask = np.zeros_like(v['latitude']).astype(bool)
+                category = ls.get_land_sfc(v['latitude'][~mask],
+                                           v['longitude'][~mask])
                 if rh == 'md':
-                    cat = category[v['height'] < v['MIXDEPTH']]
+                    cat = category[v['height'][~mask] < v['MIXDEPTH'][~mask]]
                 else:
-                    cat = category[v['height'] < float(rh)*1000]
+                    cat = category[v['height'][~mask] < float(rh)*1000]
                 categories = np.append(categories, cat)
 
             no = float(categories.shape[0]) if categories.shape[0] > 0 else -1
@@ -592,12 +597,15 @@ class trajectory():
         for rh in self.config['height']['reception']:
             categories = np.empty((0,))
             for k, v in self.data.items():
-                category = ng.get_geo_names(v['latitude'], 
-                                            v['longitude'])
+                mask = v['latitude'].mask
+                if not np.all(mask):
+                    mask = np.zeros_like(v['latitude']).astype(bool)
+                category = ng.get_geo_names(v['latitude'][~mask], 
+                                            v['longitude'][~mask])
                 if rh == 'md':
-                    cat = category[v['height'] < v['MIXDEPTH']]
+                    cat = category[v['height'][~mask] < v['MIXDEPTH'][~mask]]
                 else:
-                    cat = category[v['height'] < float(rh)*1000]
+                    cat = category[v['height'][~mask] < float(rh)*1000]
                 categories = np.append(categories, cat)
 
             no = float(categories.shape[0]) if categories.shape[0] > 0 else -1
@@ -627,19 +635,23 @@ class trajectory():
             categories = np.empty((0,))
             for k, v in self.data.items():
 
-                category = np.empty(v['latitude'].shape[0])
-                category[v['latitude'] < -60] = 0
-                category[(-60 < v['latitude']) & (v['latitude'] < -30)] = 1
-                category[(-30 < v['latitude']) & (v['latitude'] < 0)] = 2
-                category[(0 < v['latitude']) & (v['latitude'] < 30)] = 3
-                category[(30 < v['latitude']) & (v['latitude'] < 60)] = 4
-                category[60 < v['latitude']] = 5
+                mask = np.logical_or(v['latitude'].mask, v['longitude'].mask)
+                if not np.all(mask):
+                    mask = np.zeros_like(v['latitude']).astype(bool)
+                lat = v['latitude'][~mask]
+                category = np.empty(lat.shape[0])
+                category[lat < -60] = 0
+                category[(-60 < lat) & (lat < -30)] = 1
+                category[(-30 < lat) & (lat < 0)] = 2
+                category[(0 < lat) & (lat < 30)] = 3
+                category[(30 < lat) & (lat < 60)] = 4
+                category[60 < lat] = 5
                 category = category.astype(int)
  
                 if rh == 'md':
-                    cat = category[v['height'] < v['MIXDEPTH']]
+                    cat = category[v['height'][~mask] < v['MIXDEPTH'][~mask]]
                 else:
-                    cat = category[v['height'] < float(rh)*1000]
+                    cat = category[v['height'][~mask] < float(rh)*1000]
                 categories = np.append(categories, cat)
 
             no = float(categories.shape[0]) if categories.shape[0] > 0 else -1
