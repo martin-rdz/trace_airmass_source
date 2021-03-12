@@ -336,7 +336,6 @@ class assemble_time_height(trace_source.assemble_pattern):
                     print('stat lat ', k, traj.stat_lat[k])
                     self.statlat_dict[k][it, ih] = list(traj.stat_lat[k].counter.values())
                     print(self.statlat_dict[k][it, ih])
-                #input()
 
             self.no_part.append(traj.info['no_traj'])
             self.time_res.append(traj.data[1]['age'][1] - traj.data[1]['age'][2])
@@ -558,7 +557,7 @@ class trajectory():
             for k, v in self.data.items():
 
                 mask = np.logical_or(v['latitude'].mask, v['longitude'].mask)
-                if not np.all(mask):
+                if not np.any(mask):
                     mask = np.zeros_like(v['latitude']).astype(bool)
                 category = ls.get_land_sfc(v['latitude'][~mask],
                                            v['longitude'][~mask])
@@ -598,7 +597,7 @@ class trajectory():
             categories = np.empty((0,))
             for k, v in self.data.items():
                 mask = v['latitude'].mask
-                if not np.all(mask):
+                if not np.any(mask):
                     mask = np.zeros_like(v['latitude']).astype(bool)
                 category = ng.get_geo_names(v['latitude'][~mask], 
                                             v['longitude'][~mask])
@@ -636,16 +635,16 @@ class trajectory():
             for k, v in self.data.items():
 
                 mask = np.logical_or(v['latitude'].mask, v['longitude'].mask)
-                if not np.all(mask):
+                if not np.any(mask):
                     mask = np.zeros_like(v['latitude']).astype(bool)
                 lat = v['latitude'][~mask]
                 category = np.empty(lat.shape[0])
-                category[lat < -60] = 0
-                category[(-60 < lat) & (lat < -30)] = 1
-                category[(-30 < lat) & (lat < 0)] = 2
-                category[(0 < lat) & (lat < 30)] = 3
-                category[(30 < lat) & (lat < 60)] = 4
-                category[60 < lat] = 5
+                category[lat <= -60] = 0
+                category[(-60 < lat) & (lat <= -30)] = 1
+                category[(-30 < lat) & (lat <= 0)] = 2
+                category[(0 < lat) & (lat <= 30)] = 3
+                category[(30 < lat) & (lat <= 60)] = 4
+                category[60 <= lat] = 5
                 category = category.astype(int)
  
                 if rh == 'md':
