@@ -67,8 +67,10 @@ def plot_trajectories_ens(traj, savepath, ls=None, config=None):
     ###
 
     fig = plt.figure(figsize=(8, 10))
-    if config is not None and "centerlon" in config['plotmap']:
+    if config is not None and config['plotmap']['maptype'] == 'miller' and "centerlon" in config['plotmap']:
         ax = plt.axes(projection=ccrs.Miller(central_longitude=config['plotmap']['centerlon']))
+    elif config is not None and config['plotmap']['maptype'] == 'npolar':
+        ax = plt.axes(projection=ccrs.NorthPolarStereo(central_longitude=config['plotmap']['centerlon']))
     else:
         ax = plt.axes(projection=ccrs.Miller(central_longitude=-170.))
         ax = plt.axes(projection=ccrs.Miller())
