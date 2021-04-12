@@ -9,6 +9,16 @@
     4 = 'persia'
     5 = 'india'
 
+[europe2]
+    filename = 'data/geo_names_europe2.kml'
+[europe2.geo_names]
+    0 = 'cont_europe'
+    1 = 'sahara'
+    2 = 'arabian_peninsula'
+    3 = 'north_america'
+    4 = 'persia'
+    5 = 'india'
+
 [arctic]
     filename = 'data/geo_names_arctic.kml'
 [arctic.geo_names]
@@ -28,7 +38,9 @@
     3 = 'south_america'
     4 = 'persia'
     5 = 'north_america'
-    
+
+# better to replace far east deserts,
+# than india (latter one is less frequent at least at leipzig)
 [eur_na]
     filename = 'data/geo_names_eur_NA.kml'
 [eur_na.geo_names]

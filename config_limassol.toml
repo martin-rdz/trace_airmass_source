@@ -25,11 +25,13 @@ geonames = 'standard'
     rel_after_minutes = 0
     rel_pm_height = 200
     species = 24
+    outstep = 3
 
 [plotmap]
     maptype = 'miller'
     timeinterval = 6
-    heights = [1500.0, 3000.0, 4500.0, 6000.0]
+    #heights = [1500.0, 3000.0, 4500.0, 6000.0]
+    heights = []
     #heights = [1500.0, 3000.0, 4500.0, 6000.0, 8000.0, 10000.0, 11000.0]
     #heights = [8000.0, 10000.0, 11000.0]
     bounds = [-120, 80, 0, 85]

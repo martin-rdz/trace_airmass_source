@@ -16,6 +16,14 @@ geonames = 'atlantic'
     # duration of each trajectory
     tr_duration = -240
 
+[flexpart]
+    no_particles = 500
+    rel_before_minutes = 5
+    rel_after_minutes = 0
+    rel_pm_height = 200
+    species = 24
+    outstep = 3
+
 [height]
     top = 12000
     plottop = 10250

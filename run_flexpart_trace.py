@@ -142,7 +142,7 @@ print('args', args)
 
 day = datetime.datetime.strptime(args.date, "%Y%m%d")
 
-dt_list = gen_dt_list(day, day + datetime.timedelta(hours=21), 3)
+dt_list = gen_dt_list(day, day + datetime.timedelta(hours=21), config['time']['step'])
 
 print(dt_list)
 
@@ -215,7 +215,7 @@ for dt in dt_list[:]:
     write_COMMAND(os.getcwd()+'/', 
                   dt-datetime.timedelta(hours=abs(config['time']['tr_duration'])), 
                   dt,
-                  config['time']['step']*60*60)
+                  config['flexpart']['outstep']*60*60)
 
     time = [dt-datetime.timedelta(minutes=config['flexpart']['rel_before_minutes']), 
             dt+datetime.timedelta(minutes=config['flexpart']['rel_after_minutes'])]
