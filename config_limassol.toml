@@ -27,6 +27,12 @@ geonames = 'standard'
     species = 24
     outstep = 3
 
+[hysplit]
+    # terminate trajectory on contact with ground
+    #terminate_ground = true
+    terminate_ground = false
+
+
 [plotmap]
     maptype = 'miller'
     timeinterval = 6

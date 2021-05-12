@@ -364,6 +364,10 @@ class trajectory():
         self.stat_lat = {}
         self.shapes = {}
         self.config = config
+        self.terminate_ground = False
+        if 'hysplit' in config and 'terminate_ground' in config['hysplit']:
+            self.terminate_ground = config['hysplit']['terminate_ground']
+        #print('terminate ground ', self.terminate_ground)
         
         
     def load_file(self, filename, silent=False):
@@ -567,6 +571,12 @@ class trajectory():
                     cat = category[v['height'][~mask] < v['MIXDEPTH'][~mask]]
                 else:
                     cat = category[v['height'][~mask] < float(rh)*1000]
+
+                ground_touch = np.where(v['height'][~mask] < 0.01)[0]
+                if len(ground_touch > 0) and self.terminate_ground:
+                    print('terminate ground at ', ground_touch[0])
+                    cat = cat[:ground_touch[0]]
+
                 categories = np.append(categories, cat)
 
             no = float(categories.shape[0]) if categories.shape[0] > 0 else -1
@@ -607,6 +617,12 @@ class trajectory():
                     cat = category[v['height'][~mask] < v['MIXDEPTH'][~mask]]
                 else:
                     cat = category[v['height'][~mask] < float(rh)*1000]
+
+                ground_touch = np.where(v['height'][~mask] < 0.01)[0]
+                if len(ground_touch > 0) and self.terminate_ground:
+                    print('terminate ground at ', ground_touch[0])
+                    cat = cat[:ground_touch[0]]
+
                 categories = np.append(categories, cat)
 
             no = float(categories.shape[0]) if categories.shape[0] > 0 else -1
@@ -653,6 +669,12 @@ class trajectory():
                     cat = category[v['height'][~mask] < v['MIXDEPTH'][~mask]]
                 else:
                     cat = category[v['height'][~mask] < float(rh)*1000]
+
+                ground_touch = np.where(v['height'][~mask] < 0.01)[0]
+                if len(ground_touch > 0) and self.terminate_ground:
+                    print('terminate ground at ', ground_touch[0])
+                    cat = cat[:ground_touch[0]]
+                    
                 categories = np.append(categories, cat)
 
             no = float(categories.shape[0]) if categories.shape[0] > 0 else -1
