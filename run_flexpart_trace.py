@@ -142,12 +142,12 @@ print('args', args)
 
 day = datetime.datetime.strptime(args.date, "%Y%m%d")
 
+config = toml.load('config_{}.toml'.format(args.station))
 dt_list = gen_dt_list(day, day + datetime.timedelta(hours=21), config['time']['step'])
 
 print(dt_list)
 
 
-config = toml.load('config_{}.toml'.format(args.station))
 # station = 'punta'
 # coord = [-53.1344, -70.8801]
 # #station = 'limassol'
@@ -255,7 +255,10 @@ for dt in dt_list[:]:
     #p = subprocess.Popen(flexpart_bin, bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     print('cwd ', os.getcwd())
     #print('content dir ', os.listdir('.'))
-    process = subprocess.run('FLEXPART', shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+    #process = subprocess.run('FLEXPART', shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+    #process = subprocess.run('/flex_src/flexpart/src/FLEXPART', shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+    process = subprocess.run('/flex_src/flexpart_v10.4_3d7eebf/src/FLEXPART', shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+
     print(process.stdout)
 
     # print('remove and rename ', out_dir+"out", out_dir+dt.strftime("%Y%m%d_%H"))
