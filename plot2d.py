@@ -87,11 +87,11 @@ def plot_landsfc_2d(f, parameter, dt_list, config, savepath, config_dict, model)
         axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
         dsp_text = 'norm. residence time'
         #axes[it].xaxis.set_minor_locator(matplotlib.ticker.FixedLocator([0, xright]))
-        axes[it].tick_params(axis='x', labeltop='off', labelbottom='off')
+        axes[it].tick_params(axis='x', labeltop=False, labelbottom=True)
 
     param_str = parameter.replace('rt_normed_', '') 
     axes[0].set_ylabel("Height [km]", fontweight='semibold', fontsize=14)
-    axes[-1].tick_params(axis='x', labeltop='on', labelbottom='off', labelsize=11)
+    axes[-1].tick_params(axis='x', labeltop=True, labelbottom=False, labelsize=11)
     plt.suptitle("{}   {}   {}".format(dt.strftime("%Y%m%d"), config_dict['station']["name"], param_str), 
                  fontweight='semibold', fontsize=15)
     if 'moving' in config_dict['station'].keys() and config_dict['station']['moving']:
@@ -123,7 +123,7 @@ def plot_landsfc_2d(f, parameter, dt_list, config, savepath, config_dict, model)
     #plt.tight_layout(w_pad=0.0002)
     plt.tight_layout(rect=[0, 0.02, 1, 0.93])
     plt.tight_layout(rect=[0, 0.02, 1, 0.88])
-    fig.subplots_adjust(wspace=0)
+    fig.subplots_adjust(wspace=0, top=0.80)
 
     savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_{}.png".format(short_name, param_str.replace('_', '-'))
     fig.savefig(savename, dpi=400)
@@ -188,12 +188,12 @@ def plot_regions_2d(f, parameter, dt_list, config, savepath, config_dict, model)
         axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
         dsp_text = 'norm. residence time'
         #axes[it].xaxis.set_minor_locator(matplotlib.ticker.FixedLocator([0, xright]))
-        axes[it].tick_params(axis='x', labeltop='off', labelbottom='off')
+        axes[it].tick_params(axis='x', labeltop=False, labelbottom=False)
 
 
     param_str = parameter.replace('rt_normed_', '') 
     axes[0].set_ylabel("Height [km]", fontweight='semibold', fontsize=14)
-    axes[-1].tick_params(axis='x', labeltop='on', labelbottom='off', labelsize=11)
+    axes[-1].tick_params(axis='x', labeltop=True, labelbottom=False, labelsize=11)
     plt.suptitle("{}   {}   {}".format(dt.strftime("%Y%m%d"), config_dict['station']["name"], param_str), 
                  fontweight='semibold', fontsize=15)
     if 'moving' in config_dict['station'].keys() and config_dict['station']['moving']:
@@ -228,7 +228,7 @@ def plot_regions_2d(f, parameter, dt_list, config, savepath, config_dict, model)
     #plt.tight_layout(rect=[0, 0.02, 1, 0.93])
     #plt.tight_layout(rect=[0, 0.02, 1, 0.90])
     plt.tight_layout(rect=[0, 0.02, 1, 0.88])
-    fig.subplots_adjust(wspace=0)
+    fig.subplots_adjust(wspace=0, top=0.80)
 
     savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_{}.png".format(short_name, param_str.replace('_', '-'))
     fig.savefig(savename, dpi=400)
@@ -298,11 +298,11 @@ def plot_lat_2d(f, parameter, dt_list, config, savepath, config_dict, model):
         axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
         dsp_text = 'norm. residence time'
         #axes[it].xaxis.set_minor_locator(matplotlib.ticker.FixedLocator([0, xright]))
-        axes[it].tick_params(axis='x', labeltop='off', labelbottom='off')
+        axes[it].tick_params(axis='x', labeltop=False, labelbottom=False)
 
     param_str = parameter.replace('rt_normed_', '') 
     axes[0].set_ylabel("Height [km]", fontweight='semibold', fontsize=14)
-    axes[-1].tick_params(axis='x', labeltop='on', labelbottom='off', labelsize=11)
+    axes[-1].tick_params(axis='x', labeltop=True, labelbottom=False, labelsize=11)
     plt.suptitle("{}   {}   {}".format(dt.strftime("%Y%m%d"), config_dict['station']["name"], param_str), 
                  fontweight='semibold', fontsize=15)
     if 'moving' in config_dict['station'].keys() and config_dict['station']['moving']:
@@ -337,7 +337,7 @@ def plot_lat_2d(f, parameter, dt_list, config, savepath, config_dict, model):
     #plt.tight_layout(rect=[0, 0.02, 1, 0.93])
     #plt.tight_layout(rect=[0, 0.02, 1, 0.90])
     plt.tight_layout(rect=[0, 0.02, 1, 0.88])
-    fig.subplots_adjust(wspace=0)
+    fig.subplots_adjus(wspace=0, top=0.80)
 
     savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_{}.png".format(short_name, param_str.replace('_', '-'))
     fig.savefig(savename, dpi=400)

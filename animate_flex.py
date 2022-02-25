@@ -81,6 +81,19 @@ for f in files[:]:
     gc.collect()
 
 
+# for a nicer animation also include the last timestep
+#
+for i in levels:
+    dt = end
+    traj = trace_source.flexpart.read_flexpart_traj_meta(folder + "trajectories.txt")
+    meta = traj['releases_meta'][i]
+    part_pos = [[i, meta['lat_lon_bounds'][0], meta['lat_lon_bounds'][1], np.mean(meta['heights'])]]
+
+    trace_source.flexpart.plot_part_loc_map(part_pos, i, dt, traj, savepath, ls=ls, 
+                                            config=config, 
+                                            add_dyn=add_dyn,
+                                            )
+
 os.chdir(savepath)
 print(os.getcwd())
 

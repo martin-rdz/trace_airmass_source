@@ -611,6 +611,10 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
         print("using standard map")
         fig = plt.figure(figsize=(10, 7))
         ax = plt.axes(projection=ccrs.Miller(central_longitude=0))
+
+    assert config is not None
+    if config is not None and "bounds" in config['plotmap']:
+        ax.set_extent(config['plotmap']['bounds'], crs=ccrs.PlateCarree())
         
     ####
     # make a color map of fixed colors
@@ -624,6 +628,7 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
     cs = [adjust_lightness(c, amount=1.15) for c in colors]
     print('cs ', cs)
     cmap = matplotlib.colors.ListedColormap(cs)
+
     
     bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]
     norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
@@ -664,7 +669,8 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
 
         scat = ax.scatter([p.geometry.x for p in points],
                          [p.geometry.y for p in points],
-                         transform=ccrs.Geodetic(), s=0.5, 
+                         #transform=ccrs.Geodetic(), s=0.5, 
+                         transform=ccrs.PlateCarree(), s=0.5, 
                          c='crimson')
 
     # optionally add the dynamics from gfs grib
@@ -741,11 +747,16 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
                         colors='k', transform=ccrs.PlateCarree(),
                         levels=levels)
 
-
     scat = ax.scatter(release_sel[:,1], release_sel[:,2], s=2,
                       c=release_sel[:,3]/1000., cmap='plasma',
                       vmin=0.1, vmax=6.0, zorder=5,
-                      transform=ccrs.Geodetic())
+                      #transform=ccrs.Geodetic())
+                      transform=ccrs.PlateCarree())
+
+    ax.scatter(meta['lat_lon_bounds'][0], meta['lat_lon_bounds'][1], s=14,
+                      marker='^', c='tab:red', zorder=3,
+                      #transform=ccrs.Geodetic())
+                      transform=ccrs.PlateCarree())
     
     cbar = fig.colorbar(scat, fraction=0.025, pad=0.01)
     
@@ -786,9 +797,6 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
     # North Pole
     #ax.set_extent([-180, 180, 45, 90], crs=ccrs.PlateCarree())
 
-    assert config is not None
-    if config is not None and "bounds" in config['plotmap']:
-        ax.set_extent(config['plotmap']['bounds'], crs=ccrs.PlateCarree())
 
     # if maptype == 'northpole':
     #     ax.set_extent([-179, 179, 45, 90], crs=ccrs.PlateCarree())
@@ -825,11 +833,15 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
         dt.strftime('%Y-%m-%d %H'),
         *meta['lat_lon_bounds'], *meta['heights']),
         fontweight='semibold', fontsize=13)
+    
+    #fig.patch.set_facecolor('xkcd:mint green')
+    #bd = matplotlib.path.Path([[0,0],[1,0],[0.5,0.5],[0,1],[0,0]])
+    #ax.set_boundary(bd, transform=ax.transAxes)
 
     savename = savepath + "/" + "r{:0>2}_{}_{:.0f}_trajectories_map.png".format(
         release_no, dt.strftime("%Y%m%d_%H"), np.mean(meta['heights']))
     print(savename)
-    fig.savefig(savename, dpi=180)
+    fig.savefig(savename, dpi=180, transparent=False)
     plt.close('all')
 
 
