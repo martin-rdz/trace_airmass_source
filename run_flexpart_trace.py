@@ -257,7 +257,8 @@ for dt in dt_list[:]:
     #print('content dir ', os.listdir('.'))
     #process = subprocess.run('FLEXPART', shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
     #process = subprocess.run('/flex_src/flexpart/src/FLEXPART', shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
-    process = subprocess.run('/flex_src/flexpart_v10.4_3d7eebf/src/FLEXPART', shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+    #process = subprocess.run('/flex_src/flexpart_v10.4_3d7eebf/src/FLEXPART', shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+    process = subprocess.run('/flex_src/flexpart_git/src/FLEXPART', shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
 
     print(process.stdout)
 

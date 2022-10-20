@@ -34,7 +34,7 @@ def gen_file_list(start, end, path, station, model):
     return l
 
 
-def plot_landsfc_2d(f, parameter, dt_list, config, savepath, config_dict, model):
+def plot_landsfc_2d(f, parameter, dt_list, config, savepath, config_dict, model, fcst):
     time_list = f.variables["timestamp"][:]
     dt_list = [datetime.datetime.fromtimestamp(time) for time in time_list]
     height_list = f.variables["range"][:]
@@ -106,6 +106,11 @@ def plot_landsfc_2d(f, parameter, dt_list, config, savepath, config_dict, model)
                       xy=(.91, 0.925), xycoords='figure fraction',
                       horizontalalignment='center', verticalalignment='bottom',
                       fontsize=12)
+    if fcst:
+        axes[-1].annotate("forecast data ",
+                          xy=(.7, 0.0), xycoords='figure fraction',
+                          horizontalalignment='center', verticalalignment='bottom',
+                          color='red', fontsize=14)
     axes[0].annotate('Time UTC', xy=(.5, .0),
                      xycoords='figure fraction',
                      horizontalalignment='center', verticalalignment='bottom',
@@ -132,7 +137,7 @@ def plot_landsfc_2d(f, parameter, dt_list, config, savepath, config_dict, model)
     plt.close()
 
 
-def plot_regions_2d(f, parameter, dt_list, config, savepath, config_dict, model):
+def plot_regions_2d(f, parameter, dt_list, config, savepath, config_dict, model, fcst):
     with open('geonames_config.toml') as config_file:
         geo_config = toml.loads(config_file.read())
 
@@ -208,6 +213,11 @@ def plot_regions_2d(f, parameter, dt_list, config, savepath, config_dict, model)
                       xy=(.91, 0.925), xycoords='figure fraction',
                       horizontalalignment='center', verticalalignment='bottom',
                       fontsize=12)
+    if fcst:
+        axes[-1].annotate("forecast data ", 
+                          xy=(.7, 0.0), xycoords='figure fraction',
+                          horizontalalignment='center', verticalalignment='bottom',
+                          color='red', fontsize=14)
     axes[0].annotate('Time UTC', xy=(.5, .0),
                      xycoords='figure fraction',
                      horizontalalignment='center', verticalalignment='bottom',
@@ -238,7 +248,7 @@ def plot_regions_2d(f, parameter, dt_list, config, savepath, config_dict, model)
 
 
 
-def plot_lat_2d(f, parameter, dt_list, config, savepath, config_dict, model):
+def plot_lat_2d(f, parameter, dt_list, config, savepath, config_dict, model, fcst):
 
 
     #geo_names = {int(k): v for k, v in geo_config[config['geonames']]['geo_names'].items()}
@@ -317,6 +327,11 @@ def plot_lat_2d(f, parameter, dt_list, config, savepath, config_dict, model):
                       xy=(.91, 0.925), xycoords='figure fraction',
                       horizontalalignment='center', verticalalignment='bottom',
                       fontsize=12)
+    if fcst:
+        axes[-1].annotate("forecast data ",
+                          xy=(.7, 0.0), xycoords='figure fraction',
+                          horizontalalignment='center', verticalalignment='bottom',
+                          color='red', fontsize=14)
     axes[0].annotate('Time UTC', xy=(.5, .0),
                      xycoords='figure fraction',
                      horizontalalignment='center', verticalalignment='bottom',
@@ -337,7 +352,7 @@ def plot_lat_2d(f, parameter, dt_list, config, savepath, config_dict, model):
     #plt.tight_layout(rect=[0, 0.02, 1, 0.93])
     #plt.tight_layout(rect=[0, 0.02, 1, 0.90])
     plt.tight_layout(rect=[0, 0.02, 1, 0.88])
-    fig.subplots_adjus(wspace=0, top=0.80)
+    fig.subplots_adjust(wspace=0, top=0.80)
 
     savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_{}.png".format(short_name, param_str.replace('_', '-'))
     fig.savefig(savename, dpi=400)
@@ -346,7 +361,7 @@ def plot_lat_2d(f, parameter, dt_list, config, savepath, config_dict, model):
     plt.close()
 
 
-def plot_filename(filename, config_dict, model, config_file='config.toml'):
+def plot_filename(filename, config_dict, model, fcst, config_file='config.toml'):
     f = netCDF4.Dataset(filename, 'r')
     time_list = f.variables["timestamp"][:]
     height_list = f.variables["range"][:]
@@ -554,9 +569,9 @@ def plot_filename(filename, config_dict, model, config_file='config.toml'):
             rh_string = rh
         
         if 'rt_normed_region_below'+rh_string in f.variables:
-            plot_lat_2d(f, 'rt_normed_lat_below'+rh_string, dt_list, config, savepath, config_dict, model)
-        plot_regions_2d(f, 'rt_normed_region_below'+rh_string, dt_list, config, savepath, config_dict, model)
-        plot_landsfc_2d(f, 'rt_normed_landsfc_below'+rh_string, dt_list, config, savepath, config_dict, model)
+            plot_lat_2d(f, 'rt_normed_lat_below'+rh_string, dt_list, config, savepath, config_dict, model, fcst)
+        plot_regions_2d(f, 'rt_normed_region_below'+rh_string, dt_list, config, savepath, config_dict, model, fcst)
+        plot_landsfc_2d(f, 'rt_normed_landsfc_below'+rh_string, dt_list, config, savepath, config_dict, model, fcst)
 
 
     gc.collect()
@@ -566,8 +581,16 @@ parser.add_argument('--station', help='station name like limassol, barbados or m
 parser.add_argument('--date', help='date in the format YYYYMMDD')
 parser.add_argument('--daterange', help='date range in the format YYYYMMDD-YYYMMDD')
 parser.add_argument('--model', help='model to plot, default hysplit', default='hysplit')
+parser.add_argument('--fcst', default='false', help='add a flag indicating forecast data')
 
 args = parser.parse_args()
+
+if args.fcst == 'false':
+    fcst = False
+elif args.fcst == 'true':
+    fcst = True
+else:
+    raise ValueError
 
 if args.date is not None:
     begin = datetime.datetime.strptime(args.date, '%Y%m%d')
@@ -588,6 +611,6 @@ filelist = gen_file_list(begin, end, config_dict['output_dir'], short_name, args
 for filename in filelist:
     print('=============================================================================')
     print('plotting file ', filename)
-    plot_filename(filename, config_dict, args.model, config_file=config)
+    plot_filename(filename, config_dict, args.model, fcst, config_file=config)
 
 logger.warning('DeprecationWarning: New version of plot2d.py. For old version see plot2d_legacy.py')

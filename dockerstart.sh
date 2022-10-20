@@ -1,3 +1,8 @@
+
+
+# the /data dir has to be included for the symlinks to work
+docker run -v `pwd`:/trace -v ~:/workingdir -v /data:/data -p 8890:8890 --name trace_run -it flex_container /bin/bash
+
 # probably docker ignore needs to be configured
 docker build -t trace_env .
 
