@@ -145,8 +145,6 @@ print(process.stdout)
 
 
 dt_now = datetime.datetime.today()
-print(type(dt_now))
-print(type(dt_now - datetime.timedelta(hours=4)))
 # datetime of last (likely) AVAILABLE analysis
 dt_last_analysis = divmod((dt_now - datetime.timedelta(hours=4)), datetime.timedelta(hours=12))[0]
 print("dt_now", dt_now)
@@ -158,21 +156,24 @@ for d in needed_dates:
 
     print('downloading ', d, " using: ")
     # for the current issues with the ncar data source
-    if dt.date() < dt_now.date() - datetime.timedelta(days=3) and dt_now.hour > 12: # the database is updated quite late
+    print('dt', dt)
+    print('dt_last_analysis', dt_last_analysis)
+    print((dt_now - dt).total_seconds()/(60*60))
+    if dt.date() < dt_now.date() and (dt_now - dt).total_seconds() > 8*60*60: # the database is updated quite late
         # old data, that should be in the permanent database
         print('old data')
         command = download_command(WGET_TEMPLATE, dt)
     #
     #! add the 4 hours usual runtime of gfs
+    elif dt == dt_last_analysis:
+        print('data at last analysis')
+        command = download_command(WGET_TEMPLATE_FCST00, dt_last_analysis, fcsthour=0, ending_f=True)
     elif dt < dt_last_analysis:
         prior_analysis = divmod(dt, datetime.timedelta(hours=12))[0]
         fcsthour = (dt - prior_analysis).seconds / 3600
         print('data before last analysis', prior_analysis, fcsthour)
         # try analysis before
         command = download_command(WGET_TEMPLATE_FCST00, prior_analysis, fcsthour=fcsthour, ending_f=True)
-    elif dt == dt_last_analysis:
-        print('data at last analysis')
-        command = download_command(WGET_TEMPLATE_FCST00, dt_last_analysis, fcsthour=0, ending_f=True)
     else:
         print(d, 'true forecast data')
         fcsthour = (dt - dt_last_analysis).total_seconds() / 3600
