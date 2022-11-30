@@ -15,6 +15,7 @@ import string
 import toml
 import requests
 import shutil
+import traceback
 
 
 # helper function for synoptic intervals
@@ -161,7 +162,7 @@ for d in needed_dates:
     print('dt', dt)
     print('dt_last_analysis', dt_last_analysis)
     print('age ', (dt_now - dt).total_seconds()/(60*60))
-    if dt.date() < dt_now.date() and (dt_now - dt).total_seconds() > 8*60*60: # the database is updated quite late
+    if dt.date() < dt_now.date() and (dt_now - dt).total_seconds() > 11*60*60: # the database is updated quite late
         # old data, that should be in the permanent database
         print('old data')
         command, target = download_url(URL, dt)
@@ -183,12 +184,15 @@ for d in needed_dates:
         command, target = download_url(URL_FCST00, dt_last_analysis, fcsthour=fcsthour, ending_f=True)
     print(command)
 
-    with requests.get(command, cookies=aut.cookies, allow_redirects=True, stream=True) as r:
-        r.raise_for_status()
-        print('resp status', r.status_code, ' content length ', int(r.headers['Content-Length']))
-        if int(r.headers['Content-Length']) > 10:
-            with open(target, 'wb') as f:
-                shutil.copyfileobj(r.raw, f)
+    try:
+        with requests.get(command, cookies=aut.cookies, allow_redirects=True, stream=True) as r:
+            r.raise_for_status()
+            print('resp status', r.status_code, ' content length ', int(r.headers['Content-Length']))
+            if int(r.headers['Content-Length']) > 10:
+                with open(target, 'wb') as f:
+                    shutil.copyfileobj(r.raw, f)
+    except Exception:
+        print(traceback.format_exc())
 
 avail_dates = [s.replace("_f","") for s in os.listdir('.')]
 needed_dates = list(set([dt.strftime("%Y%m%d%H") for dt in dt_list]) - set(avail_dates))

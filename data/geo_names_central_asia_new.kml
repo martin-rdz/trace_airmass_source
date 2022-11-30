@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>geo_names_central_asia_CJ_DA.kml</name>
+	<open>1</open>
+	<gx:CascadingStyle kml:id="__managed_style_0BA402968B25E383ABB4">
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+				</Icon>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff0000ff</color>
+				<width>1.5</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>c0bc47ab</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle><gx:CascadingStyle kml:id="__managed_style_28ABAC1B2C25E36BCFE5">
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+				</Icon>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<width>1.5</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>800000ff</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle><gx:CascadingStyle kml:id="__managed_style_01EC932B0A25E36BCFE1">
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+				</Icon>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ffedeae8</color>
+				<width>1.5</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>c0ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle><gx:CascadingStyle kml:id="__managed_style_2AF3F0748125E387054F">
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+				</Icon>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff6abb66</color>
+				<width>1.5</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>c0007cf5</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle><gx:CascadingStyle kml:id="__managed_style_1B02474F4D25E36BCFE5">
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+				</Icon>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+			</LineStyle>
+			<PolyStyle>
+				<color>800000ff</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle><gx:CascadingStyle kml:id="__managed_style_1E7D5156D725E36BCFE7">
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+				</Icon>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+			</LineStyle>
+			<PolyStyle>
+				<color>c000aaff</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle><gx:CascadingStyle kml:id="__managed_style_1A5E12DAA025E36BCFE0">
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+				</Icon>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ffedeae8</color>
+			</LineStyle>
+			<PolyStyle>
+				<color>c0ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle><gx:CascadingStyle kml:id="__managed_style_18125A8B7E25E383ABB3">
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+				</Icon>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff0000ff</color>
+			</LineStyle>
+			<PolyStyle>
+				<color>c0bc47ab</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle><gx:CascadingStyle kml:id="__managed_style_22FBAF319525E36BCFE7">
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+				</Icon>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<width>1.5</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>c000aaff</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle><gx:CascadingStyle kml:id="__managed_style_1796B3033625E387054F">
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+				</Icon>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff6abb66</color>
+			</LineStyle>
+			<PolyStyle>
+				<color>c0007cf5</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<Style id="failed2">
+		<PolyStyle>
+			<color>cc0000aa</color>
+		</PolyStyle>
+	</Style>
+	<StyleMap id="__managed_style_0FD6349C5F25E36BCFE70">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#failed3</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#failed0</styleUrl>
+		</Pair>
+	</StyleMap>
+	<StyleMap id="__managed_style_05AB53628E25E383ABB3">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#failed2</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#failed8</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="sh_ylw-pushpin">
+		<IconStyle>
+			<scale>1.3</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<color>80ffffff</color>
+		</PolyStyle>
+	</Style>
+	<StyleMap id="__managed_style_0961A045F125E387054F">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#failed40</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#failed7</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="sn_ylw-pushpin">
+		<IconStyle>
+			<scale>1.1</scale>
+			<Icon>
+				<href>http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png</href>
+			</Icon>
+			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
+		</IconStyle>
+		<PolyStyle>
+			<color>80ffffff</color>
+		</PolyStyle>
+	</Style>
+	<Style id="failed0">
+		<LineStyle>
+			<color>ccffffff</color>
+		</LineStyle>
+		<PolyStyle>
+			<color>ccff5500</color>
+		</PolyStyle>
+	</Style>
+	<Style id="failed11">
+		<PolyStyle>
+			<color>cc00ff00</color>
+		</PolyStyle>
+	</Style>
+	<StyleMap id="failed15">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#failed10</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#failed11</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="failed6">
+		<LineStyle>
+			<color>ff0000ff</color>
+		</LineStyle>
+		<PolyStyle>
+			<color>cc4837aa</color>
+		</PolyStyle>
+	</Style>
+	<StyleMap id="__managed_style_050C27398425E36BCFE5">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#failed4</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#failed6</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="failed">
+		<PolyStyle>
+			<color>99ffaa55</color>
+		</PolyStyle>
+	</Style>
+	<Style id="failed1">
+		<PolyStyle>
+			<color>99ffaa55</color>
+		</PolyStyle>
+	</Style>
+	<Style id="failed3">
+		<LineStyle>
+			<color>ccffffff</color>
+		</LineStyle>
+		<PolyStyle>
+			<color>ccff5500</color>
+		</PolyStyle>
+	</Style>
+	<Style id="failed4">
+		<LineStyle>
+			<color>ff0000ff</color>
+		</LineStyle>
+		<PolyStyle>
+			<color>cc4837aa</color>
+		</PolyStyle>
+	</Style>
+	<StyleMap id="__managed_style_0B9B10EE7D25E36BCFE0">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#failed1</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#failed</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="failed8">
+		<PolyStyle>
+			<color>cc0000aa</color>
+		</PolyStyle>
+	</Style>
+	<StyleMap id="msn_ylw-pushpin">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#sn_ylw-pushpin</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#sh_ylw-pushpin</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Style id="failed10">
+		<PolyStyle>
+			<color>cc00ff00</color>
+		</PolyStyle>
+	</Style>
+	<Style id="failed40">
+		<PolyStyle>
+			<color>cc11ccff</color>
+		</PolyStyle>
+	</Style>
+	<Style id="failed7">
+		<PolyStyle>
+			<color>cc11ccff</color>
+		</PolyStyle>
+	</Style>
+	<Placemark id="0ED65F9ADE25D4627CEB">
+		<name>central_asia</name>
+		<open>1</open>
+		<styleUrl>#__managed_style_0B9B10EE7D25E36BCFE0</styleUrl>
+		<Polygon>
+			<outerBoundaryIs>
+				<LinearRing>
+					<coordinates>
+						86.44816294266582,47.08723410178647,0 85.22737018018391,48.10839501918936,0 82.89562530050635,49.09947086573663,0 78.07996160736258,50.73712890736483,0 75.58481541246745,51.72502707200996,0 73.39854497188672,52.55246671586533,0 69.59870060041037,53.07149955563442,0 65.27990975350053,53.22472073277211,0 60.70672551654324,51.51024800072427,0 56.55627100159057,51.47779516597549,0 52.25553548257229,50.14290343530502,0 52.25165156880531,49.78566806351312,0 52.41923207313109,48.71052174728409,0 52.64454936170081,47.20984053734678,0 53.39832369081933,45.97637549741384,0 50.74998895876987,44.60297502451957,0 54.21784959708683,37.07822406629629,0 55.61995883783793,37.3855255501981,0 57.04541227025663,37.52412816843668,0 61.04915079497911,37.18541027463657,0 63.32166456527491,35.98248599565621,0 64.95733978646402,35.55085412633653,0 68.99614645014285,33.80960247922959,0 70.6752006618356,33.27637959193079,0 75.22586739272815,34.36448946173265,0 76.11533374753178,34.1700179434329,0 78.97451824896069,35.95035460943527,0 83.19405939007559,35.84413954879484,0 87.41343734188008,37.66915690153603,0 90.00592779487104,39.02192324905412,0 91.18638940370641,40.59675925648907,0 85.56841265390497,43.82859169126176,0 86.44816294266582,47.08723410178647,0 
+					</coordinates>
+				</LinearRing>
+			</outerBoundaryIs>
+		</Polygon>
+	</Placemark>
+	<Placemark id="118C2C793225D4627CEB">
+		<name>persia</name>
+		<open>1</open>
+		<styleUrl>#__managed_style_0961A045F125E387054F</styleUrl>
+		<Polygon>
+			<outerBoundaryIs>
+				<LinearRing>
+					<coordinates>
+						68.27862830194272,28.59322339092933,0 69.27965676091075,28.57461017853841,0 70.0281936425116,29.57228109578686,0 70.11219855414369,31.19740739337375,0 70.3759449571275,32.30442253532596,0 70.662274258106,33.24883151337313,0 67.9728499567281,34.16259791778257,0 65.05935386100538,35.34503193715003,0 63.18062035454605,35.88823215070607,0 61.08582033515187,37.147173210334,0 57.19633047814431,37.34767996113544,0 55.60645623786315,37.2550213646258,0 55.11815485175068,37.26161708505608,0 54.62150266467489,37.11020006604154,0 54.13219509992041,36.97828151772201,0 51.92620140507257,36.63616906012982,0 49.22950583813059,37.60464480224032,0 49.75272829396883,40.55660955736813,0 47.80722067562024,42.33235182163215,0 41.64788843691616,41.69989478365241,0 43.05365992790831,35.13475296035512,0 44.95129437350192,33.39583012085623,0 48.71407799341136,30.15883387097079,0 49.98734511959241,30.01219474468172,0 52.30740136786517,27.3025558523041,0 55.17592742167062,26.75012056312928,0 56.76273968287707,26.90351060714528,0 57.39494729306339,25.72787151055937,0 64.56218238683118,25.23513828066539,0 66.32772358895336,25.45976846000702,0 67.35881602400387,24.53247234400148,0 68.10655623337981,25.80089970309176,0 67.64444271271788,26.48771010834429,0 67.62895151860052,27.91002884169642,0 68.27862830194272,28.59322339092933,0 
+					</coordinates>
+				</LinearRing>
+			</outerBoundaryIs>
+		</Polygon>
+	</Placemark>
+	<Placemark>
+		<name>sahara</name>
+		<open>1</open>
+		<styleUrl>#msn_ylw-pushpin</styleUrl>
+		<Polygon>
+			<tessellate>1</tessellate>
+			<outerBoundaryIs>
+				<LinearRing>
+					<coordinates>
+						10.35028412570768,12.5558997762621,0 30.45442605417155,11.39765230633794,0 39.25661016775774,16.47461884745016,0 37.54507335682334,21.32166550787634,0 32.2689541204923,31.25748948342452,0 21.643877148097,32.85749552101466,0 19.18929997780027,30.57695976650092,0 9.88774565433612,34.27359691405654,0 10.66993349033089,36.78558417505735,0 -0.4143080364179674,35.84984102576658,0 -5.751599018991426,35.68036770206924,0 -9.490611774180275,31.02351956035577,0 -12.91872793536184,27.37241177429252,0 -17.40824121146689,21.29083035847203,0 -16.92718820563331,15.29096186789575,0 10.35028412570768,12.5558997762621,0 
+					</coordinates>
+				</LinearRing>
+			</outerBoundaryIs>
+		</Polygon>
+	</Placemark>
+	<Placemark id="0DF582A1FF25D4627CEA">
+		<name>cont_europe</name>
+		<open>1</open>
+		<styleUrl>#failed15</styleUrl>
+		<Polygon>
+			<tessellate>1</tessellate>
+			<outerBoundaryIs>
+				<LinearRing>
+					<coordinates>
+						-5.810649793511851,36.08228879668917,0 -2.062439973340839,37.00247331364533,0 3.541378614846211,39.36569057024261,0 8.533453543512891,39.15471520285388,0 12.37938945350719,37.65302660488234,0 15.35145236843162,36.66856341592079,0 18.46326419438708,39.45713191856496,0 24.50344977335661,35.05788589477324,0 29.79815427487099,36.21548014452127,0 31.783231263468,37.54215005516495,0 33.50950336979916,41.83144823015017,0 28.3120206411764,41.63469504887748,0 29.97599820118846,44.43846712844479,0 37.97626875644331,44.55328381011297,0 41.93546100346363,41.69817705630879,0 47.49319254945215,42.34447621130315,0 48.69717893128147,45.84401156031447,0 52.43008138814552,47.12554384862164,0 52.13711749799269,50.15870649179428,0 56.41321342313663,51.52096392552752,0 59.71019078731104,58.15097285550073,0 59.71267046778759,69.01786726340872,0 42.22463899107561,67.93126917689467,0 27.87769097670003,71.21113453286458,0 16.0107148810557,69.11633912503652,0 5.406807065962884,62.2791030037888,0 -1.213759324835472,60.69459758605687,0 -8.098059150059125,58.23412386419189,0 -10.06611099190359,54.35781545277133,0 -10.56810279156522,52.16983489583494,0 -9.40626477020491,42.99195572043647,0 -9.618911738483911,37.53864428738808,0 -5.810649793511851,36.08228879668917,0 
+					</coordinates>
+				</LinearRing>
+			</outerBoundaryIs>
+		</Polygon>
+	</Placemark>
+	<Placemark id="0238067E2325D4627CEC">
+		<name>asia_NE</name>
+		<open>1</open>
+		<styleUrl>#__managed_style_050C27398425E36BCFE5</styleUrl>
+		<Polygon>
+			<outerBoundaryIs>
+				<LinearRing>
+					<coordinates>
+						121.3530023162733,30.07266034492685,0 121.8913820072939,31.2540738331777,0 121.5622830816447,32.17123951034473,0 120.7323820543615,33.14044301045149,0 120.198935355417,34.16026614862528,0 119.134563774496,34.59023451168266,0 119.8130496384734,35.74488647284789,0 121.8916524269982,37.08727575951011,0 121.75583164583,37.54237151664572,0 121.9623790857496,37.931787254518,0 123.3839351047597,40.12777207543923,0 125.1517466505501,39.17878862585992,0 126.2920201341048,37.06986294454344,0 126.488087996021,35.86118591524543,0 126.8388714823521,34.09035872949967,0 129.2612369216603,34.82308968873215,0 130.1930376761385,41.91931030079009,0 133.7432665155527,42.53718502005413,0 139.0687141862303,47.08031357960585,0 141.086442493973,50.66080509875172,0 140.5613606923987,54.1052376416062,0 135.4979104341682,54.66956478020097,0 144.1933597276798,59.31130637866831,0 154.9244181817675,59.32786449183695,0 155.6221002571037,57.23503678179391,0 156.818887999958,50.9731974375125,0 160.6202911120035,53.69952883063681,0 162.7601553503914,56.78258234203681,0 162.7421712990727,58.81835856270347,0 170.3438603611459,60.14639544546767,0 179.2107177016098,62.47101672616892,0 180.2397595968169,65.48027548469446,0 186.477927849788,66.77503217932937,0 171.1407659808091,69.81720114603709,0 142.8726187737005,72.33176927997957,0 125.7784318216254,73.30727708138569,0 104.6455657073642,77.6302745361408,0 60.39973364159475,69.00347172030696,0 59.83641220727051,58.17529599120212,0 58.03603532253343,54.37907328080726,0 56.59756440362777,51.63325539076194,0 58.38135930970758,51.71766398862742,0 59.64379799042878,51.71089836709208,0 60.48300854939898,51.72959771257472,0 62.72313453985997,52.58397758477584,0 65.25201758468485,53.48980649784724,0 69.7965858610478,53.34175024891032,0 72.81938671522892,52.90582758452751,0 74.43110218978308,52.4277239697939,0 75.83790263838424,51.86423263702891,0 82.18004286433241,49.44562514993443,0 85.43041053859659,48.08005446075085,0 86.51985731247827,47.09640163006163,0 85.57558311320192,43.8347934323579,0 91.1552694426703,40.58230076512276,0 90.00702499828277,39.00016822946792,0 87.37999707717862,37.61086475077716,0 83.18350518770961,35.8192902683046,0 78.88885856070294,35.86558567810903,0 76.23549550704853,34.06679188903661,0 79.10319293745386,30.57359745486174,0 84.65801635100623,28.35400520903918,0 88.01920287447615,27.64107534215865,0 93.60437884176567,27.68839376217311,0 100.3538098934633,28.661327973074,0 102.4001310859834,29.18738652274131,0 105.5913951280756,30.38187020619543,0 110.1142145627299,29.33227571436386,0 112.4507971791518,29.058781387104,0 114.4215073669133,28.86230468733782,0 118.112709188111,28.93465404657948,0 121.3530023162733,30.07266034492685,0 
+					</coordinates>
+				</LinearRing>
+			</outerBoundaryIs>
+		</Polygon>
+	</Placemark>
+	<Placemark id="08DF945B0625D4627CED">
+		<name>india</name>
+		<open>1</open>
+		<styleUrl>#__managed_style_05AB53628E25E383ABB3</styleUrl>
+		<Polygon>
+			<outerBoundaryIs>
+				<LinearRing>
+					<coordinates>
+						72.69841812181613,18.75070720593001,0 76.57576476538669,8.646994680920189,0 80.66135454417719,5.865653176794812,0 80.29843185409905,5.707627934128595,0 81.91396285775781,6.687986421565043,0 81.42121630642578,8.409376814396451,0 80.27221053360722,9.782897415400907,0 80.37063715955566,15.27366610814953,0 84.11400359247325,18.3522138053184,0 91.78958451439262,22.45491399216389,0 93.58658899479609,27.67697948091978,0 88.12812636957479,27.5912169761301,0 84.65047374596733,28.27624379915162,0 79.0657944973989,30.57329756823863,0 76.13326558922795,34.15016970989135,0 75.19426874404192,34.37241331104328,0 70.68700289844794,33.24763200763353,0 70.37861424459383,32.28703229908054,0 70.12252744856869,31.18224303517281,0 70.08781860774381,30.26501010152369,0 70.03347251566268,29.57267838435597,0 69.60537950830515,29.03776083321173,0 69.28046224207506,28.56950379523495,0 68.28294218544239,28.58582439870416,0 67.63228474619515,27.90692746117232,0 67.68718057645664,26.42569556942001,0 68.20168662941995,25.86652191505286,0 67.38230335854391,24.48807528360348,0 72.69841812181613,18.75070720593001,0 
+					</coordinates>
+				</LinearRing>
+			</outerBoundaryIs>
+		</Polygon>
+	</Placemark>
+	<Placemark>
+		<name>arabian_peninsula</name>
+		<styleUrl>#__managed_style_0FD6349C5F25E36BCFE70</styleUrl>
+		<Polygon>
+			<tessellate>1</tessellate>
+			<outerBoundaryIs>
+				<LinearRing>
+					<coordinates>
+						32.38603742241764,30.93182687111451,0 34.25989735016437,27.38469940816975,0 35.25683374891852,27.87311187538185,0 37.23059638372165,24.53273374980951,0 38.88381293525529,23.13242153093236,0 39.03527367889947,21.65115300199972,0 39.75483568260069,20.40774956668615,0 40.86793211161621,19.35782173171405,0 41.40521332507859,17.52523900835315,0 42.17219069394975,16.75612997419033,0 42.65813879943687,15.11883571900794,0 43.16539533513745,13.58050500662849,0 43.1769610444249,12.98368998846014,0 43.85393217750317,12.40508321463935,0 44.57607530905577,12.38579989499571,0 46.0564388728313,12.80062616800641,0 52.12638541982707,15.3502132185684,0 54.54253953479238,16.41393246808437,0 57.80209166322055,19.07939357817537,0 60.0205743510565,22.36342294113399,0 56.16466895648966,26.07109899680544,0 52.5151327089849,24.97813418539885,0 51.3556110693332,26.34014329866653,0 49.94728652137881,27.05761832753514,0 48.5102599237778,28.63741510386935,0 48.51625427126555,29.90965910591985,0 43.01041650540034,34.95376163074559,0 41.49711737447637,41.57252747774962,0 33.68053870610041,41.81909995171236,0 31.97699765224854,37.51212147783013,0 30.95013930743685,36.60497143460508,0 32.38603742241764,30.93182687111451,0 
+					</coordinates>
+				</LinearRing>
+			</outerBoundaryIs>
+		</Polygon>
+	</Placemark>
+</Document>
+</kml>

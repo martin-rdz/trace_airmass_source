@@ -120,7 +120,7 @@ class assemble_pattern():
         self.dt_list = trace_source.time_list(self.config['time']['begin_dt'],
                                               self.config['time']['end_dt'],
                                               self.config['time']['step'])
-        print('dt_list', self.dt_list)
+        print('dt_list', self.dt_list[:5])
         self.height_list = list(range(self.config['height']['base'], 
                                       self.config['height']['top']+1, 
                                       self.config['height']['interval']))
