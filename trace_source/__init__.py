@@ -125,6 +125,11 @@ class assemble_pattern():
                                       self.config['height']['top']+1, 
                                       self.config['height']['interval']))
 
+        if 'seaice' in self.config and self.config['seaice']['doseaice']:
+            self.doseaice = True
+        else:
+            self.doseaice = False
+
         self.no_part = []
         self.time_res = []
 
@@ -159,6 +164,8 @@ class assemble_pattern():
         dim_cat = dataset.createDimension('categories', 7)
         dim_regions = dataset.createDimension('regions', len(list(self.geo_names.keys())))
         dim_lats = dataset.createDimension('lat_thres', len(list(self.lat_names.keys())))
+        if self.doseaice:
+            dim_si = dataset.createDimension('cat_si', len(list(self.seaice_names.keys())))
 
         # times_cn = dataset.createVariable('time', np.float32, ('time',))
         # times_cn[:] = hours_cn.astype(np.float32)
@@ -221,7 +228,7 @@ class assemble_pattern():
         print('ls_data_keys ', ls_data_keys)
         modified_params = {key: {'var_name': key,
                                  'long_name': "land surface " + key.lower(),
-                                 'comment': str(self.ls_categories)} for key in ls_data_keys}
+                                 'comment': str(self.ls_names)} for key in ls_data_keys}
         for k in ls_data_keys:
             print(k, self.statls_dict.get(k).shape)
             dataset = save_item(dataset, {'var_name': modified_params[k]['var_name'],
@@ -329,6 +336,41 @@ class assemble_pattern():
         #                     'missing_value': -99., 'plot_range': (0.01, 4.),
         #                     'plot_scale': "logarithmic"})
 
+        if self.doseaice:
+            si_data_keys = list(self.statsi_dict.keys())
+            print('si_data_keys ', si_data_keys)
+            modified_params = {key: {'var_name': key,
+                                     'long_name': "sea ice " + key.lower(),
+                                     'comment': str(self.seaice_names)} for key in si_data_keys}
+            for k in si_data_keys:
+                print("write sea ice")
+                print(k, self.statsi_dict.get(k).shape)
+                dataset = save_item(dataset, {'var_name': modified_params[k]['var_name'],
+                                              'dimension': ('time', 'height', 'cat_si'),
+                                              'arr': self.statsi_dict.get(k),
+                                              'long_name': modified_params[k]['long_name'],
+                                              'comment': modified_params[k]['comment']})
+
+            for k in [ky for ky in si_data_keys if 'ens' in ky]:
+                print("write sea ice")
+                rel = self.statsi_dict.get(k)
+                no_below = self.stat2d_dict.get(k + "_no_below")
+                no_below = np.repeat(no_below[:,:,np.newaxis], rel.shape[-1], axis=2)
+                no_below[no_below < 0] = np.nan
+                norm = np.array(self.no_part)*10*(24./np.array(self.time_res))
+                norm = np.repeat(norm[:,np.newaxis], rel.shape[1], axis=1)
+                norm = np.repeat(norm[:,:,np.newaxis], rel.shape[2], axis=2)
+
+                normed_time = rel*no_below/norm
+                normed_time[~np.isfinite(normed_time)] = -1
+                str_below = modified_params[k]['var_name'].replace("si_ens_", "")
+                var_name = "rt_normed_seaice_" + str_below
+                long_name = "normed residence time sea ice " + str_below
+                dataset = save_item(dataset, {'var_name': var_name,
+                                              'dimension': ('time', 'height', 'cat_si'),
+                                              'arr': normed_time,
+                                              'long_name': long_name,
+                                              'comment': modified_params[k]['comment']})
 
         with open('output_meta.toml') as output_meta:
             meta_info = toml.loads(output_meta.read())

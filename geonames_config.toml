@@ -96,7 +96,7 @@
 
 [central_asia]
     filename = 'data/geo_names_central_asia_new.kml'
-[south.geo_names]
+[central_asia.geo_names]
     0 = 'central_asia'
     1 = 'persia'
     2 = 'sahara'
