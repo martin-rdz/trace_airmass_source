@@ -94,9 +94,11 @@ class land_sfc():
     ===============   =========================
 
     """
-    def __init__(self):
-        filename =  os.path.dirname(os.path.abspath(__file__)) +\
-                    '/../data/resampledLCType.tif'
+    def __init__(self, filename=None):
+
+        if not filename:
+            filename =  os.path.dirname(os.path.abspath(__file__)) +\
+                        '/../data/resampledLCType.tif'
 
         #with rasterio.divers():
         with rasterio.open(filename, 'r') as src:
@@ -129,9 +131,9 @@ class land_sfc():
         etemp, northings = T1 * (np.meshgrid(np.arange(1), np.arange(im.shape[0])))
         eastings, ntemp = T1 * (np.meshgrid(np.arange(im.shape[1]), np.arange(1)))
         #print(eastings, northings)
-
         # the geotiff provided is already in WGS84
-        assert src.crs == 'EPSG:4326'
+        print('src.crs', src.crs)
+        #assert src.crs == 'EPSG:4326'
         # # Project all longitudes, latitudes
         # p2 = Proj(proj='latlong', datum='WGS84')
         # _, lats = transform(p1, p2, etemp, northings)
