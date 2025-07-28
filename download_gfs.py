@@ -109,20 +109,26 @@ config = toml.load('server_logins.toml')
 url = 'https://rda.ucar.edu/cgi-bin/login'
 values = {'email': config['flexpart']['login'], 'passwd': config['flexpart']['password'], 'action': 'login'}
 # Authenticate
-aut = requests.post(url,data=values)
-if aut.status_code != 200:
-    print('Bad Authentication')
-    print(aut.text)
+#aut = requests.post(url,data=values)
+#if aut.status_code != 200:
+#    print('Bad Authentication')
+#    print(aut.text)
+#print(aut.text)
 
 
 
 if args.model == 'gfs1':
     data_dir = "data/gfs_083.2/"
-    URL = '''https://rda.ucar.edu/data/ds083.2/grib2/${year}/${year}.${month}/fnl_${date}_${hour}_00.grib2'''
+    # URL = '''https://stratus.rda.ucar.edu/data/ds083.2/grib2/${year}/${year}.${month}/fnl_${date}_${hour}_00.grib2'''
+    URL = '''https://stratus.rda.ucar.edu/ds083.2/grib2/${year}/${year}.${month}/fnl_${date}_${hour}_00.grib2'''
+    URL = '''https://data.rda.ucar.edu/d083002/grib2/${year}/${year}.${month}/fnl_${date}_${hour}_00.grib2'''
     URL_FCST00 = '''https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.${date}/${hour}/atmos/gfs.t${hour}z.pgrb2.1p00.f${fcsthour}'''
+    #URL_FCST00 = '''https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gdas.${date}/${hour}/atmos/gdas.t${hour}z.pgrb2.1p00.f${fcsthour}'''
 elif args.model == 'gfs0p25':
     data_dir = "data/gfs_083.3/"
-    URL = '''https://rda.ucar.edu/data/ds083.3/${year}/${year}${month}/gdas1.fnl0p25.${date}${hour}.f${fcsthour}.grib2'''
+    # URL = '''https://stratus.rda.ucar.edu/data/ds083.3/${year}/${year}${month}/gdas1.fnl0p25.${date}${hour}.f${fcsthour}.grib2'''
+    URL = '''https://stratus.rda.ucar.edu/ds083.3/${year}/${year}${month}/gdas1.fnl0p25.${date}${hour}.f${fcsthour}.grib2'''
+    URL = '''https://data.rda.ucar.edu/d083003/${year}/${year}${month}/gdas1.fnl0p25.${date}${hour}.f${fcsthour}.grib2'''
 else:
     raise ValueError
 
@@ -185,10 +191,16 @@ for d in needed_dates:
     print(command)
 
     try:
-        with requests.get(command, cookies=aut.cookies, allow_redirects=True, stream=True) as r:
+        #with requests.get(command, cookies=aut.cookies, allow_redirects=True, stream=True) as r:
+        with requests.get(command, allow_redirects=True, stream=True) as r:
             r.raise_for_status()
-            print('resp status', r.status_code, ' content length ', int(r.headers['Content-Length']))
-            if int(r.headers['Content-Length']) > 10:
+            print(r.headers)
+            if 'Content-Length' in r.headers.keys():
+                print('resp status', r.status_code, ' content length ', int(r.headers['Content-Length']))
+                if int(r.headers['Content-Length']) > 10:
+                    with open(target, 'wb') as f:
+                        shutil.copyfileobj(r.raw, f)
+            else:
                 with open(target, 'wb') as f:
                     shutil.copyfileobj(r.raw, f)
     except Exception:

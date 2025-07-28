@@ -261,6 +261,11 @@ for dt in dt_list[:]:
     process = subprocess.run('/flex_src/flexpart/src/FLEXPART', shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
 
     print(process.stdout)
+    print(process.stderr)
+    print(process.returncode)
+    print(len(process.stdout))
+    assert len(process.stdout) > 10000, "len of output not sufficient"
+    assert "CONGRATULATIONS: YOU HAVE SUCCESSFULLY COMPLETED A FLEXPART MODEL RUN!" in process.stdout, "success message missing"
 
     # print('remove and rename ', out_dir+"out", out_dir+dt.strftime("%Y%m%d_%H"))
     # if dt.strftime("%Y%m%d_%H") in os.listdir(out_dir):
