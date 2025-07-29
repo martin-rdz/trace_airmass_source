@@ -192,7 +192,7 @@ for d in needed_dates:
 
     try:
         #with requests.get(command, cookies=aut.cookies, allow_redirects=True, stream=True) as r:
-        with requests.get(command, allow_redirects=True, stream=True) as r:
+        with requests.get(command, allow_redirects=True, stream=True, verify=False) as r:
             r.raise_for_status()
             print(r.headers)
             if 'Content-Length' in r.headers.keys():

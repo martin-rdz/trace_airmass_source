@@ -94,9 +94,14 @@ class land_sfc():
     ===============   =========================
 
     """
-    def __init__(self):
-        filename =  os.path.dirname(os.path.abspath(__file__)) +\
-                    '/../data/resampledLCType.tif'
+    def __init__(self, filename=None):
+
+        if not filename:
+            filename =  os.path.dirname(os.path.abspath(__file__)) +\
+                        '/../data/resampledLCType.tif'
+            self.source = 'default'
+        else:
+            self.source = 'regridded'
 
         #with rasterio.divers():
         with rasterio.open(filename, 'r') as src:
@@ -131,7 +136,9 @@ class land_sfc():
         #print(eastings, northings)
 
         # the geotiff provided is already in WGS84
-        assert src.crs == 'EPSG:4326'
+        if self.source == 'default':
+            assert src.crs == 'EPSG:4326'
+
         # # Project all longitudes, latitudes
         # p2 = Proj(proj='latlong', datum='WGS84')
         # _, lats = transform(p1, p2, etemp, northings)
@@ -243,11 +250,11 @@ def fast_geonames(geo_names_data, polygons, lat, lon):
     geo_id[:] = -1
 
     for j, name in geo_names_data.items():
-        #is_within = shapely.vectorized.contains(polygons[name], lon, lat)
+        is_within = shapely.vectorized.contains(polygons[name], lon, lat)
         print('shapely version', shapely.__version__)
         print(type(polygons[name]))
         print(polygons[name].wkt)
-        is_within = shapely.contains_xy(polygons[name], lon, lat)
+        #is_within = shapely.contains_xy(polygons[name], lon, lat)
         geo_id[is_within] = j
 
     return geo_id
@@ -279,7 +286,8 @@ class named_geography():
         for p in list(docu.features()):
             print(p.name)
             print(p.geometry)
-            polygons[p.name] = shapely.from_wkt(p.geometry.wkt)
+            #polygons[p.name] = shapely.from_wkt(p.geometry.wkt)
+            polygons[p.name] = p.geometry
 
         self.polygons = polygons
         # self.geo_names = {0: 'cont_europe', 1: 'sahara', 2: 'arabian_peninsula',
