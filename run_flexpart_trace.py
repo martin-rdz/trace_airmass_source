@@ -187,7 +187,8 @@ elif args.fields == 'gfs0p25':
 else:
     raise ValueError
 
-out_dir = '../flexpart_partposit/{}/'.format(args.station)
+#out_dir = '../flexpart_partposit/{}/'.format(args.station)
+out_dir = '../{}'.format(config['partposit_dir'])
 print('out_dir', out_dir)
 
 os.chdir('flexpart_simulations')

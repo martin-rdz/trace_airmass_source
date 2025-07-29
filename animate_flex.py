@@ -47,7 +47,9 @@ dt_range = [end-datetime.timedelta(days=10), end]
 
 files = os.listdir(folder)
 files = sorted([f for f in files if 'partposit' in f])
-ls = trace_source.land_sfc.land_sfc()
+
+#ls = trace_source.land_sfc.land_sfc()
+ls = trace_source.land_sfc.land_sfc(filename='/trace/data/LC_Miller.tif')
 
 if args.levels is not None:
     levels = args.levels

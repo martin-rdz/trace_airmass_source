@@ -605,7 +605,8 @@ class assemble_time_height(trace_source.assemble_pattern):
         # trying to free memory
         del ls
         del ng
-        del si
+        if self.doseaice:
+            del si
 
 
 def redistribute_rgb(r, g, b):
@@ -663,6 +664,7 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
         fig = plt.figure(figsize=(10, 7))
         if "centerlon" in config['plotmap']:
             ax = plt.axes(projection=ccrs.Miller(central_longitude=config['plotmap']['centerlon']))
+            print(config['plotmap']['centerlon'])
         else:
             ax = plt.axes(projection=ccrs.Miller(central_longitude=0))
     else:
@@ -672,7 +674,8 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
 
     assert config is not None
     if config is not None and "bounds" in config['plotmap']:
-        ax.set_extent(config['plotmap']['bounds'], crs=ccrs.PlateCarree())
+        print(config['plotmap']['bounds'])
+        ax.set_extent(config['plotmap']['bounds'], crs=ccrs.Geodetic())
         
     ####
     # make a color map of fixed colors
@@ -691,7 +694,10 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
     bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]
     norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
     ####
-    pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc_data, cmap=cmap, norm=norm, transform=ccrs.PlateCarree())
+    if ls.source == 'default':
+        pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc_data, cmap=cmap, norm=norm, transform=ccrs.PlateCarree())
+    else:
+        pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc_data, cmap=cmap, norm=norm, transform=ccrs.Miller(central_longitude=0))
     # high resolution coastlines
     #ax.coastlines(resolution='110m')
     ax.coastlines(resolution='50m')
