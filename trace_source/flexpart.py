@@ -221,12 +221,13 @@ class flex_statistics():
     this is different to the hysplit stuff, as the data format differs
     """
 
-    def __init__(self, config, ng=None, ls=None, doseaice=False):
+    def __init__(self, config, ng=None, ls=None, doseaice=False, doseaicev2=False):
         self.statistics = {}
         self.stat_ls = {}
         self.stat_gn = {}
         self.stat_lat = {}
         self.stat_si = {}
+        self.stat_siv2 = {}
 
         self.config = config
         if ng is None:
@@ -243,6 +244,7 @@ class flex_statistics():
         self.ls_categories = defaultdict(lambda: np.empty((0,)))
         self.thres_categories = defaultdict(lambda: np.empty((0,)))
         self.si_categories = defaultdict(lambda: np.empty((0,)))
+        self.siv2_categories = defaultdict(lambda: np.empty((0,)))
 
 
     def add_partposits_ls(self, array):
@@ -399,6 +401,40 @@ class flex_statistics():
             self.stat_si['si_ens_below' + rh_string] = occ_stat(no_below=no, counter=c)
 
 
+    def add_partposits_siv2(self, si, array):
+        """
+        """
+
+        for rh in self.config['height']['reception']:
+            if rh == 'md':
+                coords = array[array[:,3] < array[:,9]]
+            else:
+                coords = array[array[:,3] < float(rh)*1000]
+            # print('loop trough reception heights ', rh, coords.shape)
+
+            category = si.get_si(coords[:,2], coords[:,1])
+
+            self.siv2_categories[rh] = np.append(self.siv2_categories[rh], category)
+
+    def calc_siv2_stat(self, si):
+        """
+        """
+
+        occ_stat = namedtuple('occ_stat', 'no_below counter')
+
+        for rh in self.config['height']['reception']:
+            cat_this_height = self.siv2_categories[rh]
+            no = float(cat_this_height.shape[0]) if cat_this_height.shape[0] > 0 else -1
+            c = {x: cat_this_height.tolist().count(x)/float(no) for x in list(si.categories.keys())}
+
+            if rh != 'md':
+                rh_string = rh + 'km'
+            else:
+                rh_string = rh
+
+            self.stat_siv2['siv2_ens_below' + rh_string] = occ_stat(no_below=no, counter=c)
+
+
 class assemble_time_height(trace_source.assemble_pattern):
 
     #@profile
@@ -470,6 +506,13 @@ class assemble_time_height(trace_source.assemble_pattern):
                                                              len(list(self.seaice_names.keys())))))
             si = trace_source.land_sfc.sea_ice(self.config['seaice']['relpath'])
 
+        if self.doseaicev2:
+            siv2 = trace_source.land_sfc.sea_ice_v2(self.config['seaicev2']['relpath'])
+            self.seaicev2_names = siv2.categories
+            self.statsiv2_dict = defaultdict(lambda: np.zeros((len(self.dt_list),
+                                                             len(self.height_list),
+                                                             len(list(self.seaicev2_names.keys())))))
+
         for it, dt in enumerate(self.dt_list[:]):
             print('trajectories eding at ', dt)
             files_for_time = os.listdir(traj_dir + dt.strftime("%Y%m%d_%H"))
@@ -500,6 +543,11 @@ class assemble_time_height(trace_source.assemble_pattern):
                         datetime.datetime.strptime(
                             re.search(r"_(\d{12})", f).group(1), 
                             "%Y%m%d%H%M"))
+                if self.doseaicev2:
+                    siv2.load_day(
+                        datetime.datetime.strptime(
+                            re.search(r"_(\d{12})", f).group(1), 
+                            "%Y%m%d%H%M"))
 
                 for ih, h in enumerate(self.height_list):
                     #print("at ", ih, h)
@@ -517,6 +565,8 @@ class assemble_time_height(trace_source.assemble_pattern):
 
                     if self.doseaice:
                         flex_stat[ih].add_partposits_si(si, release_sel)
+                    if self.doseaicev2:
+                        flex_stat[ih].add_partposits_siv2(siv2, release_sel)
 
             # now assemble the statistics for all heights
             for ih, h in enumerate(self.height_list): 
@@ -547,6 +597,13 @@ class assemble_time_height(trace_source.assemble_pattern):
                         self.stat2d_dict[k+'_no_below'][it, ih] = flex_stat[ih].stat_si[k].no_below
                         print('stat_si ', h, k, flex_stat[ih].stat_si[k])
                         self.statsi_dict[k][it, ih] = list(flex_stat[ih].stat_si[k].counter.values())
+                if self.doseaicev2:
+                    print("-- sea icev2")
+                    flex_stat[ih].calc_siv2_stat(siv2)
+                    for k in list(flex_stat[ih].stat_siv2.keys()):
+                        self.stat2d_dict[k+'_no_below'][it, ih] = flex_stat[ih].stat_siv2[k].no_below
+                        print('stat_siv2 ', h, k, flex_stat[ih].stat_siv2[k])
+                        self.statsiv2_dict[k][it, ih] = list(flex_stat[ih].stat_siv2[k].counter.values())
 
             # #assert len(f_list) > 1
             # for ih, f in enumerate(f_list):
@@ -607,6 +664,8 @@ class assemble_time_height(trace_source.assemble_pattern):
         del ng
         if self.doseaice:
             del si
+        if self.doseaicev2:
+            del siv2
 
 
 def redistribute_rgb(r, g, b):

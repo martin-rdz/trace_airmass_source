@@ -467,6 +467,109 @@ def plot_seaice_2d(f, parameter, dt_list, config, savepath, config_dict, model, 
     fig.savefig(savename)
     plt.close()
 
+
+def plot_seaicev2_2d(f, parameter, dt_list, config, savepath, config_dict, model, fcst):
+
+    lat_names = ast.literal_eval(f.variables[parameter].comment)
+
+    NUM_COLORS = f.variables[parameter].shape[-1]
+    colors = ['lightskyblue', 'seagreen', 'khaki', '#6edd6e', 'darkmagenta', 'gray', 'tan',
+              (0.2, 0.4, 0.8, 1.0), (0.0, 0.6, 1.0, 1.0), (0.373, 0.588, 0.741, 1.0),]
+
+    time_list = f.variables["timestamp"][:]
+    dt_list = [datetime.datetime.fromtimestamp(time) for time in time_list]    
+    height_list = f.variables["range"][:]
+    no_plots = len(dt_list)
+
+    fig, axes = plt.subplots(1, no_plots, sharex=True, sharey=True, figsize=(12, 6))
+    #fig, axes = plt.subplots(1, no_plots, sharex=True, sharey=True, figsize=(9, 6))
+
+    for it, dt in enumerate(dt_list):
+        occ_height = f.variables[parameter][it, :, :]
+        occ_height = np.ma.masked_less(occ_height, 0)
+        occ_left = np.cumsum(occ_height, axis=1)
+
+        l = []
+        for i in range(NUM_COLORS):
+            if i == 0:
+                l.append(axes[it].barh(height_list, occ_height[:, 0].T, left=0, 
+                    align='center', height=0.3, color=colors[0], edgecolor='none'))
+            else:
+                l.append(axes[it].barh(height_list, occ_height[:, i].T, left=occ_left[:, i-1].T,
+                    align='center', height=0.3, color=colors[i], edgecolor='none'))
+
+        axes[it].set_ylim([0, 12])
+        axes[it].set_ylim([0, config['height']['plottop']/1000.])
+        axes[it].tick_params(axis='y', which='major', labelsize=14, 
+                             width=1.5, length=3)
+        axes[it].tick_params(axis='both', which='minor', width=1, length=2)
+        axes[it].tick_params(axis='both', which='both', right=True, top=True,
+                             direction='in')
+        axes[it].yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1.0))
+        axes[it].set_xlabel(dt.strftime('%H:%M'), fontsize=14)
+        
+        axes[it].set_xlim(right=1.05)
+        axes[it].xaxis.set_minor_locator(matplotlib.ticker.AutoMinorLocator())
+        dsp_text = 'norm. residence time'
+        #axes[it].xaxis.set_minor_locator(matplotlib.ticker.FixedLocator([0, xright]))
+        axes[it].tick_params(axis='x', labeltop=False, labelbottom=False)
+
+    param_str = parameter.replace('rt_normed_', '') 
+    axes[0].set_ylabel("Height [km]", fontweight='semibold', fontsize=14)
+    axes[-1].tick_params(axis='x', labeltop=True, labelbottom=False, labelsize=11)
+    plt.suptitle("{}   {}   {}".format(dt.strftime("%Y%m%d"), config_dict['station']["name"], param_str), 
+                 fontweight='semibold', fontsize=15)
+    if 'moving' in config_dict['station'].keys() and config_dict['station']['moving']:
+        pass
+    else:
+        axes[-1].annotate("Endpoint: {:.1f} {:.1f} ".format(config_dict['station']["lat"], 
+                                                            config_dict['station']["lon"]), 
+                        xy=(.91, 0.96), xycoords='figure fraction',
+                        horizontalalignment='center', verticalalignment='bottom',
+                        fontsize=12)
+    axes[-1].annotate("{} ".format(model), 
+                      xy=(.91, 0.925), xycoords='figure fraction',
+                      horizontalalignment='center', verticalalignment='bottom',
+                      fontsize=12)
+    if fcst:
+        axes[-1].annotate("forecast data ",
+                          xy=(.7, 0.0), xycoords='figure fraction',
+                          horizontalalignment='center', verticalalignment='bottom',
+                          color='red', fontsize=14)
+    axes[0].annotate('Time UTC', xy=(.5, .0),
+                     xycoords='figure fraction',
+                     horizontalalignment='center', verticalalignment='bottom',
+                     fontsize=14, fontweight='semibold')
+    axes[-1].annotate(dsp_text, xy=(.90, 0.86),
+                      xycoords='figure fraction',
+                      horizontalalignment='center', verticalalignment='bottom',
+                      fontsize=12, fontweight='semibold')
+
+    fig.legend(l, list(lat_names.values()),
+               loc='upper left',
+               #bbox_to_anchor=(0.01, 0.952),
+               bbox_to_anchor=(0.01, 0.947),
+               ncol=5, fontsize=12, framealpha=0.8)
+    #fig.set_tight_layout({'rect': [0, 0, 1, 1], 'pad': 0.1, 'h_pad': 1.5})
+    #plt.tight_layout(w_pad=0.0002)
+
+    #plt.tight_layout(rect=[0, 0.02, 1, 0.93])
+    #plt.tight_layout(rect=[0, 0.02, 1, 0.90])
+    plt.tight_layout(rect=[0, 0.02, 1, 0.88])
+    fig.subplots_adjust(wspace=0, top=0.80)
+
+    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_{}.png".format(short_name, param_str.replace('_', '-'))
+    print(savename)
+    fig.savefig(savename, dpi=400)
+    savename = savepath + "/" + dt.strftime("%Y%m%d") + "_{}_{}.svg".format(short_name, param_str.replace('_', '-'))
+    print(savename)
+    fig.savefig(savename)
+    plt.close()
+
+
+
+
+
 def plot_filename(filename, config_dict, model, fcst, config_file='config.toml'):
     f = netCDF4.Dataset(filename, 'r')
     time_list = f.variables["timestamp"][:]
@@ -680,6 +783,8 @@ def plot_filename(filename, config_dict, model, fcst, config_file='config.toml')
         plot_landsfc_2d(f, 'rt_normed_landsfc_below'+rh_string, dt_list, config, savepath, config_dict, model, fcst)
         if 'rt_normed_seaice_below'+rh_string in f.variables:
             plot_seaice_2d(f, 'rt_normed_seaice_below'+rh_string, dt_list, config, savepath, config_dict, model, fcst)
+        if 'rt_normed_seaicev2_below'+rh_string in f.variables:
+            plot_seaicev2_2d(f, 'rt_normed_seaicev2_below'+rh_string, dt_list, config, savepath, config_dict, model, fcst)
 
 
     gc.collect()

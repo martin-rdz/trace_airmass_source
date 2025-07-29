@@ -134,9 +134,8 @@ class land_sfc():
         etemp, northings = T1 * (np.meshgrid(np.arange(1), np.arange(im.shape[0])))
         eastings, ntemp = T1 * (np.meshgrid(np.arange(im.shape[1]), np.arange(1)))
         #print(eastings, northings)
+
         # the geotiff provided is already in WGS84
-        print('src.crs', src.crs)
-        #assert src.crs == 'EPSG:4326'
         if self.source == 'default':
             assert src.crs == 'EPSG:4326'
 
@@ -252,9 +251,9 @@ def fast_geonames(geo_names_data, polygons, lat, lon):
 
     for j, name in geo_names_data.items():
         is_within = shapely.vectorized.contains(polygons[name], lon, lat)
-        print('shapely version', shapely.__version__)
-        print(type(polygons[name]))
-        print(polygons[name].wkt)
+        #print('shapely version', shapely.__version__)
+        #print(type(polygons[name]))
+        #print(polygons[name].wkt)
         #is_within = shapely.contains_xy(polygons[name], lon, lat)
         geo_id[is_within] = j
 
@@ -285,8 +284,8 @@ class named_geography():
         docu = list(k.features())[0]
         polygons = {}
         for p in list(docu.features()):
-            print(p.name)
-            print(p.geometry)
+            #print(p.name)
+            #print(p.geometry)
             #polygons[p.name] = shapely.from_wkt(p.geometry.wkt)
             polygons[p.name] = p.geometry
 
@@ -296,7 +295,7 @@ class named_geography():
         self.geo_names = {int(k): v for k, v in self.config[selected_type]['geo_names'].items()}
         assert set(polygons.keys()) == set(self.geo_names.values()), \
             ('not all keys in polygon are matched', polygons.keys(), self.geo_names.values())
-        print('loaded the named_geography')
+        #print('loaded the named_geography')
         print('available geo names ', self.geo_names)
 
 
@@ -347,7 +346,7 @@ class sea_ice():
 
         print(self.dt, dt)
         if self.dt == dt.date():
-            print('date is current one')
+            #print('date is current one')
             return
 
         self.dt = dt.date()
@@ -369,17 +368,15 @@ class sea_ice():
 
             T0 = src.transform
             p1 = Proj(src.crs)
-            print('T0 aka affine transformation ', T0)
-            print('src.crs', src.crs)
-            print('p1', p1)
+            #print('T0 aka affine transformation ', T0)
+            #print('src.crs', src.crs)
+            #print('p1', p1)
 
             crs_wgs84 = rasterio.crs.CRS.from_string('EPSG:4326')
             from rasterio.warp import calculate_default_transform, reproject, Resampling
             transform, width, height = calculate_default_transform(
                 src.crs, crs_wgs84, src.width, src.height, *src.bounds)
-            print(transform)
             # should be width, height 3600 1800
-            print('width, height', width, height)
             kwargs = src.meta.copy()
             kwargs.update({
                 'crs': crs_wgs84,
@@ -402,7 +399,6 @@ class sea_ice():
                             dst_nodata=222
                             )
             
-                    print('dst.crs', dst.crs)
                     meta = dst.meta
                     width = meta['width']
                     height = meta['height']
@@ -413,18 +409,13 @@ class sea_ice():
 
                     T0 = dst.transform
                     p1 = Proj(dst.crs)
-                    print('T0 aka affine transformation ', T0)
-                    print('p1', p1)
-
 
                     # allocate memory for image
                     im = np.empty([height, width], dtype)
-
                     # read image into memory
                     im[:, :] = dst.read(1)
 
                     # for diagnostics save an output file
-                    print(fpath.with_name(fpath.stem + '_reproj' + fpath.suffix))
                     profile = dst.profile
                     with rasterio.open(fpath.with_name(fpath.stem + '_reproj' + fpath.suffix), 
                                        'w', **profile) as dst2:
@@ -446,39 +437,17 @@ class sea_ice():
 
         T1 = T0 * Affine.translation(0.5, 0.5)
         # Function to convert pixel row/column index (from 0) to easting/northing at centre
-        print('affine transformation', T1)
 
         etemp, northings = T1 * (np.meshgrid(np.arange(1), np.arange(im.shape[0])))
         eastings, ntemp = T1 * (np.meshgrid(np.arange(im.shape[1]), np.arange(1)))
-        #print(eastings, northings)
-
-        # the geotiff provided is already in WGS84
-        # # Project all longitudes, latitudes
-        # p2 = Proj(proj='latlong', datum='WGS84')
-        # _, lats = transform(p1, p2, etemp, northings)
-        # longs, _ = transform(p1, p2, eastings, ntemp)
-
-        # slow version of the coordinate calculation
-        # cols, rows = np.meshgrid(np.arange(im.shape[1]), np.arange(im.shape[0]))
-        # # Get affine transform for pixel centres
-        # T1 = T0 * Affine.translation(0.5, 0.5)
-        # # Function to convert pixel row/column index (from 0) to easting/northing at centre
-        # rc2en = lambda r, c: (c, r) * T1
-        # # All eastings and northings (there is probably a faster way to do this)
-        # eastings, northings = np.vectorize(rc2en, otypes=[np.float, np.float])(rows, cols)
-        # #print("eastings", eastings.nbytes, eastings)
-        # #print("northings", northings.nbytes, northings)
-        # # Project all longitudes, latitudes
-        # p2 = Proj(proj='latlong', datum='WGS84')
-        # longs, lats = transform(p1, p2, eastings, northings)
 
         if (eastings == eastings[0, :]).all():
             self.longs = eastings[0, :]
         if (northings.T == northings[:, 0]).all():
             self.lats = northings[:, 0]
 
-        print('calculated longs ', self.longs[:10])
-        print('calculated lats ', self.lats[:10])
+        #print('calculated longs ', self.longs[:10])
+        #print('calculated lats ', self.lats[:10])
         assert dst.crs == 'EPSG:4326'
 
         #print(im[0,:])
@@ -520,6 +489,103 @@ class sea_ice():
         cats[np.array(lat) > -55] = 0
         #print('sea ice cats', cats)
         return cats
+
+
+
+class sea_ice_v2():
+    """
+    """
+
+    def __init__(self, basepath):
+
+        self.dt = None
+        self.basepath = os.path.dirname(os.path.abspath(__file__)) + f'/{basepath}'
+        print("setup sea ice object")
+        self.categories = {0:'water',1:'forest',2:'savanna/shrub',
+                           3:'grass/crop', 4:'urban',5:'snow',6:'barren',
+                           7:'sea ice 1..30', 8:'sea ice 30..80', 9: 'sea_ice >90'}
+
+
+
+    def load_day(self, dt):
+
+        if self.dt == dt.date():
+            #print('date is current one')
+            return
+
+        self.dt = dt.date()
+
+        filename = f'{self.basepath}/{dt:%Y%m%d}_class_with_si.tif'
+
+        from pathlib import Path
+        fpath = Path(filename)
+        with rasterio.open(filename, 'r') as src:
+            meta = src.meta
+            width = meta['width']
+            height = meta['height']
+            count = meta['count']
+            dtype = meta['dtype']
+            self.shape = src.shape
+            self.transform = src.transform
+
+            T0 = src.transform
+            p1 = Proj(src.crs)
+
+            # allocate memory for image
+            im = np.empty([height, width], dtype)
+            # read image into memory
+            im[:, :] = src.read(1)
+
+            self.sea_ice_cover = im.copy()
+
+        T1 = T0 * Affine.translation(0.5, 0.5)
+
+        etemp, northings = T1 * (np.meshgrid(np.arange(1), np.arange(im.shape[0])))
+        eastings, ntemp = T1 * (np.meshgrid(np.arange(im.shape[1]), np.arange(1)))
+
+        if (eastings == eastings[0, :]).all():
+            self.longs = eastings[0, :]
+        if (northings.T == northings[:, 0]).all():
+            self.lats = northings[:, 0]
+
+        print('calculated longs ', self.longs[:10])
+        print('calculated lats ', self.lats[:10])
+        assert src.crs == 'EPSG:4326'
+
+
+    def get_si(self, lat, lon):
+        """
+        get the land use pixel for a given coordinate
+        interpolation to the nearest pixel is done
+
+        Args:
+            lat (float, array): latitude
+            lon (float, array): longitude
+
+        Returns:
+            array or int with the land use category
+        """
+
+        if isinstance(lat, float):
+            lat = [lat]
+            lon = [lon]
+        if isinstance(lat, np.ma.core.MaskedArray):
+            lat = lat.filled(-999.).tolist()
+            lon = lon.filled(-999.).tolist()
+        elif isinstance(lat, np.ndarray):
+            lat = lat.tolist()
+            lon = lon.tolist()
+        # im[lat, lon]
+
+        if lat:
+            cats = fast_land_sfc(self.sea_ice_cover, lat, lon, self.lats, self.longs)
+        else:
+            cats = np.array([])
+
+        assert len(lat) == cats.shape[0]
+        return cats
+
+
 
 if __name__ == '__main__':
     ng = named_geography()
