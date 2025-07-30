@@ -503,7 +503,7 @@ class sea_ice_v2():
         print("setup sea ice object")
         self.categories = {0:'water',1:'forest',2:'savanna/shrub',
                            3:'grass/crop', 4:'urban',5:'snow',6:'barren',
-                           7:'sea ice 1..30', 8:'sea ice 30..80', 9: 'sea_ice >90'}
+                           7:'sea ice 1..30', 8:'sea ice 30..80', 9: 'sea_ice >80'}
 
 
 
