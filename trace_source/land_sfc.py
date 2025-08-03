@@ -60,17 +60,16 @@ def argnearest(value, array, delta):
 
 #@jit(nopython=True)
 def fast_land_sfc(land_sfc_data, lat, lon, lats, longs):
-    land_sfc_category = np.zeros((len(lat),))
+    #land_sfc_category = np.zeros((len(lat),), dtype=np.int16)
 
-
-    land_sfc_category_new = np.zeros((len(lat),))
+    #land_sfc_category_new = np.zeros((len(lat),))
     ilat = np.round((lat - lats[0])/-0.1).astype(int)
     ilat[ilat >= lats.shape[0]-1] = lats.shape[0]-1
     ilat[ilat < 0] = 0
     ilon = np.round((lon - longs[0])/0.1).astype(int)
     ilon[ilon >= longs.shape[0]-1] = longs.shape[0]-1
     ilon[ilon < 0] = 0
-    land_sfc_category = land_sfc_data[ilat, ilon]
+    land_sfc_category = land_sfc_data[ilat, ilon].astype(np.int16)
     land_sfc_category[lat == -999.] = -1
 
     return land_sfc_category
@@ -99,9 +98,9 @@ class land_sfc():
         if not filename:
             filename =  os.path.dirname(os.path.abspath(__file__)) +\
                         '/../data/resampledLCType.tif'
-            self.source = 'default'
+            self.projection = 'default'
         else:
-            self.source = 'regridded'
+            self.projection = 'regridded'
 
         #with rasterio.divers():
         with rasterio.open(filename, 'r') as src:
@@ -112,6 +111,9 @@ class land_sfc():
             dtype = meta['dtype']
             self.shape = src.shape
             self.transform = src.transform
+            self.meta = src.meta
+            self.meta['bounds'] = src.bounds
+            self.crs = src.crs
 
             T0 = src.transform
             p1 = Proj(src.crs)
@@ -128,6 +130,7 @@ class land_sfc():
 
 
         T1 = T0 * Affine.translation(0.5, 0.5)
+        self.T1 = T1
         # Function to convert pixel row/column index (from 0) to easting/northing at centre
         print('affine transformation', T1)
 
@@ -136,7 +139,7 @@ class land_sfc():
         #print(eastings, northings)
 
         # the geotiff provided is already in WGS84
-        if self.source == 'default':
+        if self.projection == 'default':
             assert src.crs == 'EPSG:4326'
 
         # # Project all longitudes, latitudes
@@ -181,6 +184,25 @@ class land_sfc():
 
         self.categories = {0:'water',1:'forest',2:'savanna/shrub',
                            3:'grass/crop',4:'urban',5:'snow',6:'barren'}
+
+
+    def get_reprojected(self, dst_crs):
+        from rasterio.warp import calculate_default_transform, reproject, Resampling
+
+        transform, width, height = calculate_default_transform(
+            self.crs, dst_crs, self.meta['width'], self.meta['height'], *self.meta['bounds'])
+
+        im = np.empty([height, width])
+        reproject(
+            source=self.land_sfc_data,
+            destination=im,
+            src_transform=self.T1,
+            src_crs=self.crs,
+            dst_transform=transform,
+            dst_crs=dst_crs,
+            resampling=Resampling.nearest)
+        x, y = np.meshgrid(np.arange(width), np.arange(height)) * transform
+        return x, y, im
 
     #@jit(nopython=True)
     #@profile
@@ -243,18 +265,21 @@ class land_sfc():
         return masked_land_sfc
 
 
-@jit(forceobj=True)
+#@jit(forceobj=True)
 def fast_geonames(geo_names_data, polygons, lat, lon):
 
     geo_id = np.zeros((len(lat),))
     geo_id[:] = -1
 
     for j, name in geo_names_data.items():
-        is_within = shapely.vectorized.contains(polygons[name], lon, lat)
+        #print(name)
+        #print(type(polygons[name]))
+        #is_within = shapely.vectorized.contains(polygons[name], lon, lat)
+        #is_within = [shapely.contains_xy(polygons[name], x,y) for x,y in zip(lon,lat)]
         #print('shapely version', shapely.__version__)
         #print(type(polygons[name]))
         #print(polygons[name].wkt)
-        #is_within = shapely.contains_xy(polygons[name], lon, lat)
+        is_within = shapely.contains_xy(polygons[name], lon, lat)
         geo_id[is_within] = j
 
     return geo_id
@@ -277,17 +302,16 @@ class named_geography():
         # filename =  os.path.dirname(os.path.abspath(__file__)) +\
         #            '/../prior_examples/geo_names.kml'
 
-        k = kml.KML()
-        with open(filename, 'r') as f:
-            k.from_string(bytes(bytearray(f.read(), encoding='utf-8')))
-
-        docu = list(k.features())[0]
+        k = kml.KML.parse(filename)
+        docu = list(k.features)[0]
+        docu = k.features[0]
         polygons = {}
-        for p in list(docu.features()):
+        for p in list(docu.features):
             #print(p.name)
             #print(p.geometry)
-            #polygons[p.name] = shapely.from_wkt(p.geometry.wkt)
-            polygons[p.name] = p.geometry
+            #print(type(p.geometry))
+            polygons[p.name] = shapely.from_wkt(p.geometry.wkt)
+            #polygons[p.name] = shapely.geometry.Polygon(p.geometry)
 
         self.polygons = polygons
         # self.geo_names = {0: 'cont_europe', 1: 'sahara', 2: 'arabian_peninsula',
@@ -504,7 +528,7 @@ class sea_ice_v2():
         self.categories = {0:'water',1:'forest',2:'savanna/shrub',
                            3:'grass/crop', 4:'urban',5:'snow',6:'barren',
                            7:'sea ice 1..30', 8:'sea ice 30..80', 9: 'sea_ice >80'}
-
+        self.projection = 'default'
 
 
     def load_day(self, dt):
@@ -530,6 +554,9 @@ class sea_ice_v2():
 
             T0 = src.transform
             p1 = Proj(src.crs)
+            self.crs = src.crs
+            self.meta = src.meta
+            self.meta['bounds'] = src.bounds
 
             # allocate memory for image
             im = np.empty([height, width], dtype)
@@ -537,8 +564,10 @@ class sea_ice_v2():
             im[:, :] = src.read(1)
 
             self.sea_ice_cover = im.copy()
+            self.land_sfc_data = self.sea_ice_cover
 
         T1 = T0 * Affine.translation(0.5, 0.5)
+        self.T1 = T1
 
         etemp, northings = T1 * (np.meshgrid(np.arange(1), np.arange(im.shape[0])))
         eastings, ntemp = T1 * (np.meshgrid(np.arange(im.shape[1]), np.arange(1)))
@@ -551,6 +580,24 @@ class sea_ice_v2():
         print('calculated longs ', self.longs[:10])
         print('calculated lats ', self.lats[:10])
         assert src.crs == 'EPSG:4326'
+
+    def get_reprojected(self, dst_crs):
+        from rasterio.warp import calculate_default_transform, reproject, Resampling
+
+        transform, width, height = calculate_default_transform(
+            self.crs, dst_crs, self.meta['width'], self.meta['height'], *self.meta['bounds'])
+
+        im = np.empty([height, width])
+        reproject(
+            source=self.land_sfc_data,
+            destination=im,
+            src_transform=self.T1,
+            src_crs=self.crs,
+            dst_transform=transform,
+            dst_crs=dst_crs,
+            resampling=Resampling.nearest)
+        x, y = np.meshgrid(np.arange(width), np.arange(height)) * transform
+        return x, y, im
 
 
     def get_si(self, lat, lon):

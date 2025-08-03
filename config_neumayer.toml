@@ -1,0 +1,67 @@
+# configuration file for trace_source
+# toml seems to be a much more sane solution than json (adds comments for example)
+# https://github.com/toml-lang/toml
+#
+
+output_dir = "output/neumayer/" 
+plot_dir = "plots/neumayer" 
+traj_dir = "trajectories/neumayer/"
+partposit_dir = "flexpart_partposit/neumayer/"
+
+#geonames = 'south'
+geonames = 'south_antpen'
+
+
+[flexpart]
+    no_particles = 500
+    rel_before_minutes = 5
+    rel_after_minutes = 0
+    rel_pm_height = 200
+    species = 24
+    outstep = 3
+
+[plotmap]
+    maptype = 'miller'
+    seaice = true
+    timeinterval = 6
+    #heights = [1500.0, 3000.0, 4500.0, 6000.0]
+    heights = []
+    #heights = [1500.0, 3000.0, 4500.0, 6000.0, 8000.0, 10000.0, 11000.0]
+    # heights = [8000.0, 10000.0, 11000.0]
+    #bounds = [-179.9, 180.0, -83.0, 0.0]
+    bounds = [90, 91, -80, 0]
+    # detailed map for paper
+    #bounds = [-100, -50, -65, -20]
+    centerlon = -90
+    figsize=[10.0, 4.5]
+
+[time]
+    begin = '2019-01-01_00'
+    end = '2019-12-31_00'
+    # time step for which trajectories are calculated
+    step = 3
+    # duration of each trajectory
+    tr_duration = -240
+
+[seaice]
+    doseaice = true
+    relpath = '/../data/sea_ice_amsr/asi-AMSR2-s6250'
+
+[seaicev2]
+    doseaice = true
+    relpath = '/../data/ls_si/'
+
+[height]
+    top = 12000
+    base = 500
+    interval = 500
+    plottop = 10250
+    # 'md' mixing depth, '2.0' in km without
+    reception = ['md', '1.0', '2.0', '5.0', '8.0', '15.0']
+
+[station]
+    name = 'Neumayer'
+    short_name = 'neumayer' 
+    lat = -70.674444
+    lon = -8.274167
+    altitude = 20

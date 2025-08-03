@@ -692,7 +692,7 @@ def adjust_lightness(color, amount=0.5):
 
 
 
-def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, 
+def plot_part_loc_map_legacy(part_pos, release_no, dt, traj, savepath, ls=None, 
         config=None, add_dyn=True, add_fire=None):
     """"""
     
@@ -707,7 +707,6 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
 
     if ls is None:
         ls = trace_source.land_sfc.land_sfc()
-
 
     if not os.path.isdir(savepath):
         os.makedirs(savepath)
@@ -753,7 +752,7 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
     bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]
     norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
     ####
-    if ls.source == 'default':
+    if ls.projection == 'default':
         pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc_data, cmap=cmap, norm=norm, transform=ccrs.PlateCarree())
     else:
         pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc_data, cmap=cmap, norm=norm, transform=ccrs.Miller(central_longitude=0))
@@ -968,6 +967,272 @@ def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None,
     plt.close('all')
 
 
+
+def plot_part_loc_map(part_pos, release_no, dt, traj, savepath, ls=None, 
+        config=None, add_dyn=True, add_fire=None):
+    """"""
+    
+    release_sel = np.array([list(p) for p in part_pos if p[0]==release_no])
+    meta = traj['releases_meta'][release_no]
+      
+    import matplotlib
+    matplotlib.use('Agg')
+    import cartopy.crs as ccrs
+    import matplotlib.pyplot as plt
+    from fastkml import kml
+    print(matplotlib.__version__)
+
+    if ls is None:
+        ls = trace_source.land_sfc.land_sfc()
+
+    if not os.path.isdir(savepath):
+        os.makedirs(savepath)
+    
+    if 'figsize' in config['plotmap']:
+        figsize = config['plotmap']['figsize']
+    else:
+        figsize = (10, 7)
+    if 'height_ratios' in config['plotmap']:
+        height_ratios = config['plotmap']['height_ratios']
+    else:
+        height_ratios = [5, 1]
+    
+    
+    fig = plt.figure(figsize=figsize, layout='constrained')
+    gs = matplotlib.gridspec.GridSpec(2,2, figure=fig, height_ratios=height_ratios, width_ratios=[2.5,1],
+                                      wspace=0, hspace=0)
+    gs00 = matplotlib.gridspec.GridSpecFromSubplotSpec(2,1, subplot_spec=gs[1,1])
+    # if config['plotmap']['maptype'] == 'northpole':
+    #     if "centerlon" in config['plotmap']:
+    #         ax = plt.axes(projection=ccrs.NorthPolarStereo(central_longitude=config['plotmap']['centerlon']))
+    #     else:
+    #         ax = plt.axes(projection=ccrs.NorthPolarStereo(central_longitude=45))
+
+    if config['plotmap']['maptype'] == 'miller':
+        if "centerlon" in config['plotmap']:
+            target_crs = ccrs.Miller(central_longitude=config['plotmap']['centerlon'])
+            print(config['plotmap']['centerlon'])
+            if config['plotmap']['centerlon'] < 0:
+                # seems to be an upstram bug, wher rioxarray cannot handle that projection (rasterio can)
+                target_crs_rioxr = ccrs.Miller()
+            else:
+                target_crs_rioxr = target_crs
+        else:
+            target_crs = ccrs.Miller(central_longitude=0)
+    else:
+        print("using standard map")
+        target_crs = ccrs.Miller(central_longitude=0)
+    #target_crs = ccrs.Miller(central_longitude=config['plotmap']['centerlon'])
+    ax = fig.add_subplot(gs[0,:], projection=target_crs)
+    ax_leg = fig.add_subplot(gs[1,0])
+    ax_cbar = fig.add_subplot(gs00[0])
+
+    assert config is not None
+    if config is not None and "bounds" in config['plotmap']:
+        print(config['plotmap']['bounds'])
+        if 'bounds_crs' in config['plotmap']:
+            ax.set_extent(config['plotmap']['bounds'], crs=ccrs.CRS(config['plotmap']['bounds_crs']))
+        else:
+            ax.set_extent(config['plotmap']['bounds'], crs=ccrs.Geodetic())
+        
+    ####
+    # make a color map of fixed colors
+    colors = ['lightskyblue', 'darkgreen', 'khaki', 'palegreen', 'red', 'white', 'tan']
+    # better green for the light map
+    colors = ['lightskyblue', 'seagreen', 'khaki', '#6edd6e', 'darkmagenta', 'white', 'tan']
+    #colors = ['lightskyblue', 'seagreen', 'khaki', '#a4dd6e', 'red', 'white', 'tan']
+    colors = ['lightskyblue', '#22a361', 'khaki', '#72d472', 'darkmagenta', 'white', 'tan']
+    bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5]
+    labels = ['Water', 'Forest', 'Savanna/shrubland', 'Grass/cropland', 'Urban', 'Snow/ice', 'Barren']
+    if len(ls.categories) == 10: # simple check for sea ice product
+        print('sea ice categories')
+        colors = ['lightskyblue', '#22a361', 'khaki', '#72d472', 'darkmagenta', 'white', 'tan',
+                  (0.2, 0.4, 0.8, 1.0), (0.0, 0.6, 1.0, 1.0), (0.373, 0.588, 0.741, 1.0),]
+        labels = {0: 'Water', 1: 'Forest', 2: 'Savanna/shrub', 3: 'Grass/crop', 4: 'Urban', 
+                  5: 'Snow/ice', 6: 'Barren', 7: 'Sea ice 1..30', 8: 'Sea ice 30..80',
+                  9: 'Sea ice >80'}.values()
+        bounds = [-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5]
+
+    cmap = matplotlib.colors.ListedColormap(colors)
+
+    cs = [adjust_lightness(c, amount=1.15) for c in colors]
+    print('cs ', cs)
+    cmap = matplotlib.colors.ListedColormap(cs)
+    
+    norm = matplotlib.colors.BoundaryNorm(bounds, cmap.N)
+    ####
+    import time
+    start = time.time()
+    #if ls.projection == 'default':
+    #    pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc_data, cmap=cmap, norm=norm, transform=ccrs.PlateCarree())
+    #elif ls.projection == 'regridded':
+    #    pcm = ax.pcolormesh(ls.longs, ls.lats, ls.land_sfc_data, cmap=cmap, norm=norm, transform=ccrs.Miller(central_longitude=0))
+    pcm = ax.pcolormesh(*ls.get_reprojected(target_crs), cmap=cmap, norm=norm, transform=target_crs)
+    print('plot background ', time.time()-start)
+    # high resolution coastlines
+    #ax.coastlines(resolution='110m')
+    ax.coastlines(resolution='50m')
+    # ax.coastlines(resolution='10m')
+
+    handles = []
+    for c, l in zip(cs, labels):
+        if 'Snow' in l:
+            handles.append(matplotlib.patches.Patch(
+                facecolor=c, label=l, edgecolor='grey', linewidth=2))
+        else:
+            handles.append(matplotlib.patches.Patch(color=c, label=l))
+    
+    # omit The modis fire map (see commits before August 2025)
+
+    # optionally add the dynamics from gfs grib
+    if add_dyn:
+        import xarray as xr
+        import rioxarray
+        from rasterio.enums import Resampling
+
+        start = time.time()
+        if dt.hour%6 == 0:
+            gribfile = f"data/gfs_083.2/{dt.strftime('%Y%m%d%H')}"
+            print(gribfile)
+            if not os.path.isfile(gribfile):
+                print('try forecast file')
+                gribfile = f"data/gfs_083.2/{dt.strftime('%Y%m%d%H')}_f"
+
+            ds_isobaric = xr.load_dataset(
+                gribfile, 
+                engine='cfgrib', backend_kwargs={'filter_by_keys':{'typeOfLevel':'isobaricInhPa'}, 
+                                                 'errors': 'ignore'})
+
+            ds_mean_sea = xr.load_dataset(
+                gribfile, 
+                engine='cfgrib', backend_kwargs={'filter_by_keys':{'typeOfLevel':'meanSea'}, 
+                                                'errors': 'ignore'})
+
+            prmsl = ds_mean_sea.prmsl
+            ds_iso = ds_isobaric.gh.sel(isobaricInhPa=500)
+
+
+        else:
+            gribfile1 = f"data/gfs_083.2/{(dt - datetime.timedelta(hours=3)).strftime('%Y%m%d%H')}"
+            gribfile2 = f"data/gfs_083.2/{(dt + datetime.timedelta(hours=3)).strftime('%Y%m%d%H')}"
+            if not os.path.isfile(gribfile1):
+                print('try forecast file')
+                gribfile1 = f"data/gfs_083.2/{(dt - datetime.timedelta(hours=3)).strftime('%Y%m%d%H')}_f"
+            if not os.path.isfile(gribfile2):
+                print('try forecast file')
+                gribfile2 = f"data/gfs_083.2/{(dt + datetime.timedelta(hours=3)).strftime('%Y%m%d%H')}_f"
+            print(gribfile1, gribfile2)
+
+            ds_isobaric = xr.load_dataset(
+                gribfile1, 
+                engine='cfgrib', backend_kwargs={'filter_by_keys':{'typeOfLevel':'isobaricInhPa'}, 
+                                                 'errors': 'ignore'})
+
+            ds_mean_sea = xr.load_dataset(
+                gribfile1, 
+                engine='cfgrib', backend_kwargs={'filter_by_keys':{'typeOfLevel':'meanSea'}, 
+                                                'errors': 'ignore'})
+
+            
+            ds_isobaric2 = xr.load_dataset(
+                gribfile2, 
+                engine='cfgrib', backend_kwargs={'filter_by_keys':{'typeOfLevel':'isobaricInhPa'}, 
+                                                 'errors': 'ignore'})
+
+            ds_mean_sea2 = xr.load_dataset(
+                gribfile2, 
+                engine='cfgrib', backend_kwargs={'filter_by_keys':{'typeOfLevel':'meanSea'}, 
+                                                'errors': 'ignore'})
+
+            ds_mean_sea['prmsl'][:] = np.mean(np.dstack((ds_mean_sea.prmsl, ds_mean_sea2.prmsl)), axis=2)
+            prmsl = ds_mean_sea.prmsl
+            ds_iso = ds_isobaric.gh.sel(isobaricInhPa=500)
+            ds_iso[:] = np.mean(
+                    np.dstack((ds_isobaric.gh.sel(isobaricInhPa=500), ds_isobaric2.gh.sel(isobaricInhPa=500))), axis=2)
+
+        prmsl = prmsl.rio.write_crs('EPSG:4326')
+        prmsl_reproj = prmsl.rio.reproject(target_crs_rioxr, resampling=Resampling.bilinear)
+        ds_iso = ds_iso.rio.write_crs('EPSG:4326')
+        gh_500_reproj = ds_iso.rio.reproject(target_crs_rioxr, resampling=Resampling.bilinear)
+
+        levels = np.arange(930,1050,4)
+        #cont = ax.contour(ds_mean_sea.longitude, ds_mean_sea.latitude, 
+        #                prmsl/100., linewidths=0.4,
+        #                colors='lightcoral', transform=ccrs.PlateCarree(),
+        #                levels=levels)
+        cont = ax.contour(prmsl_reproj.x, prmsl_reproj.y, 
+                        prmsl_reproj/100., linewidths=0.4,
+                        colors='lightcoral', transform=target_crs,
+                        levels=levels)
+
+        levels = np.arange(0,900,8)
+        cont = ax.contour(gh_500_reproj.x, gh_500_reproj.y, 
+                          gh_500_reproj/10., linewidths=0.4,
+                          colors='k', transform=target_crs,
+                          levels=levels)
+
+        print('duration for met', time.time() - start)
+
+    scat = ax.scatter(release_sel[:,1], release_sel[:,2], s=2,
+                      c=release_sel[:,3]/1000., cmap='plasma',
+                      vmin=0.0, vmax=5.0, zorder=5,
+                      #transform=ccrs.Geodetic())
+                      transform=ccrs.PlateCarree())
+
+    ax.scatter(meta['lat_lon_bounds'][0], meta['lat_lon_bounds'][1], s=14,
+                      marker='^', c='tab:red', zorder=3,
+                      #transform=ccrs.Geodetic())
+                      transform=ccrs.PlateCarree())
+    
+    
+    #cbar = fig.colorbar(scat, fraction=0.025, pad=0.01)
+    #cax = ax.inset_axes([0.6, 0.09, 0.35, 0.04]) # [x0, y0, width, height]
+    cbar = fig.colorbar(scat, cax=ax_cbar, orientation='horizontal', aspect=20)
+    
+    cbar.ax.set_xlabel('Height [km]', fontsize=12)
+    cbar.ax.tick_params(axis='both', which='major', labelsize=12,
+                        width=2, length=4)
+    
+    # add the geometry boundaries (also omit, see commits before August 2025)
+    
+    ax.gridlines(linestyle=':')
+    str1_pos = (.2,0.080)
+    s = "MODIS land cover classification [Broxton and Zeng 2014, JAMC]"
+    if 'seaice' in config['plotmap'] and config['plotmap']['seaice']:
+        s += "\nAMSR2 sea ice conc [Spreen et al. 2008, JGR]"
+    ax_leg.text(0.04, 0.05, s, fontsize=9,
+                horizontalalignment='left', verticalalignment='bottom',
+                transform=ax_leg.transAxes)
+
+
+    #fig.legend(handles, labels, ncol=5, fontsize=10,
+    #            bbox_to_anchor=(0.20,0.185), loc='upper left')
+    ax_leg.legend(handles, labels, ncol=5, fontsize=10,
+                  #bbox_to_anchor=(0.05,0.5), 
+                  borderaxespad=0,
+                  columnspacing=1,
+                  #loc='upper left')
+                  loc=(0.03,0.6))
+    ax_leg.set_axis_off()
+
+    ax.set_title('Flexpart particle positions {}UTC\nRelease: [{:.2f} {:.2f} {:.2f} {:.2f}] {:.0f}-{:.0f}m'.format(
+        dt.strftime('%Y-%m-%d %H'),
+        *meta['lat_lon_bounds'], *meta['heights']),
+        fontweight='semibold', fontsize=13)
+
+    ext = ax.get_extent()
+    print('map width/height', (ext[1]-ext[0]) / (ext[3] - ext[2]))
+    print('map height/width', (ext[3] - ext[2]) / (ext[1]-ext[0]))
+    
+    #fig.patch.set_facecolor('xkcd:mint green')
+    #bd = matplotlib.path.Path([[0,0],[1,0],[0.5,0.5],[0,1],[0,0]])
+    #ax.set_boundary(bd, transform=ax.transAxes)
+
+    savename = savepath + "/" + "r{:0>2}_{}_{:.0f}_trajectories_map.png".format(
+        release_no, dt.strftime("%Y%m%d_%H"), np.mean(meta['heights']))
+    print(savename)
+    fig.savefig(savename, dpi=180, transparent=False)
+    plt.close('all')
 
 
 

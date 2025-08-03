@@ -131,7 +131,7 @@ python3 compress_data.py --station STATIONNAME --daterange YYYYMMDD-YYYYMMDD
 ### Surface classification
 Four sources for the surface classification are available. The raster-based MODIS land cover classification, the polygon-based geography names, a latitude bands and AMSR sea ice cover.
 
-![](examples/products_update.png)
+![](examples/products_update_v2.png)
 
 Currently under development is a version combining the surface classification and the sea ice products.
 

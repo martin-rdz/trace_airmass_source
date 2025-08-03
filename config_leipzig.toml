@@ -1,0 +1,76 @@
+# configuration file for trace_source
+# toml seems to be a much more sane solution than json (adds comments for example)
+# https://github.com/toml-lang/toml
+#
+
+output_dir = "output/leipzig/"
+plot_dir = "plots/leipzig/"
+#traj_dir = "prior_examples/trajectories_leipzig/"
+traj_dir = "trajectories/leipzig/"
+partposit_dir = "flexpart_partposit/leipzig/"
+
+#geonames = 'standard'
+geonames = 'europe2'
+# geonames = 'fire2'
+#geonames = 'fire3'
+#geonames = 'eur_na'
+
+[time]
+    #begin = '2018-03-14_00'
+    #end = '2018-03-25_00'
+    begin = '2015-09-09_00'
+    end = '2015-09-14_00'
+    # time step for which trajectories are calculated
+    step = 3
+    # duration of each trajectory
+    tr_duration = -240
+
+[flexpart]
+    no_particles = 500
+    rel_before_minutes = 5
+    rel_after_minutes = 0
+    rel_pm_height = 200
+    species = 24
+    outstep = 3
+
+[hysplit]
+    # terminate trajectory on contact with ground
+    #terminate_ground = true
+    terminate_ground = false
+
+
+[plotmap]
+    maptype = 'miller'
+    #timeinterval = 6
+    timeinterval = 24
+    #heights = [1500.0, 3000.0, 4500.0, 6000.0]
+    #heights = [3000.0, ]
+    heights = []
+    # heights = [8000.0, 10000.0, 11000.0]
+    #bounds = [-179.9, 180.0, -75.0, 0.0]
+    #bounds = [-120, 80, 0, 85]
+    # default:
+    #bounds = [-179.9, 180.0, -10.0, 88.0]
+    # for the vulcano
+    bounds = [-125.0, 45.0, 3.0, 40.0]
+    # detailed map for paper
+    #bounds = [-100, -50, -65, -20]
+    centerlon = -10
+    figsize=[10.0, 8.5]
+    height_ratios = [7,1]
+
+[height]
+    #top = 18000
+    base = 500
+    interval = 500
+    top = 12000
+    plottop = 12250
+    # 'md' mixing depth, '2.0' in km without
+    reception = ['md', '2.0', '5.0', '8.0', '10.0']
+
+[station]
+    name = 'Leipzig'
+    short_name = 'leipzig'
+    lat = 51.352
+    lon = 12.436
+    altitude = 100
